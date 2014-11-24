@@ -99,9 +99,12 @@ class RewritingListener
         $dispatcher = $event->getDispatcher();
         $application = $dispatcher->getApplication();
 
-        if (true === self::_updateUrl($application, $page, $maincontent)) {
-            foreach ($page->getChildren() as $descendant) {
-                self::_updateUrl($application, $descendant);
+        if (true === self::updateUrl($application, $page, $maincontent) && true == $page->hasMainSection()) {
+            $descendants = $application->getEntityManager()
+                    ->getRepository('BackBuilder\NestedNode\Page')
+                    ->getDescendants($page, 1);
+            foreach ($descendants as $descendant) {
+                self::updateUrl($application, $descendant);
             }
         }
     }
@@ -113,7 +116,7 @@ class RewritingListener
      * @param \BackBee\NestedNode\Page            $page
      * @param \BackBee\ClassContent\AClassContent $maincontent
      */
-    private static function _updateUrl(BBApplication $application, Page $page, AClassContent $maincontent = null)
+    private static function updateUrl(BBApplication $application, Page $page, AClassContent $maincontent = null)
     {
         $url_generator = $application->getUrlGenerator();
         if (false === ($url_generator instanceof IUrlGenerator)) {

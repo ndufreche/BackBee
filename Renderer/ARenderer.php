@@ -26,7 +26,7 @@ namespace BackBee\Renderer;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
 use BackBee\BBApplication;
-use BackBee\NestedNode\ANestedNode;
+use BackBee\NestedNode\Page;
 use BackBee\Renderer\Event\RendererEvent;
 use BackBee\Renderer\Exception\RendererException;
 use BackBee\Site\Layout;
@@ -668,12 +668,12 @@ abstract class ARenderer implements IRenderer
 
     /**
      * @codeCoverageIgnore
-     * @param  ANestedNode $node
-     * @return self
+     * @param  \BackBuilder\NestedNode\Page $page
+     * @return \BackBuilder\Renderer\ARenderer
      */
-    public function setNode(ANestedNode $node)
+    public function setNode(Page $page)
     {
-        $this->_node = $node;
+        $this->_node = $page;
 
         return $this;
     }

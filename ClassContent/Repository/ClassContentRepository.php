@@ -23,16 +23,16 @@
 
 namespace BackBee\ClassContent\Repository;
 
+use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Query;
+use Doctrine\ORM\Query\ResultSetMapping;
+
 use BackBee\BBApplication;
 use BackBee\ClassContent\AClassContent;
 use BackBee\ClassContent\ContentSet;
 use BackBee\NestedNode\Page;
 use BackBee\Security\Token\BBUserToken;
 use BackBee\Util\Doctrine\SettablePaginator;
-use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\Query;
-use Doctrine\ORM\Query\ResultSetMapping;
-use Symfony\Component\Security\Core\Util\ClassUtils;
 
 /**
  * AClassContent repository
@@ -82,33 +82,29 @@ class ClassContentRepository extends EntityRepository
     public function updateRootContentSetByPage(Page $page, ContentSet $oldContentSet, ContentSet $newContentSet, BBUserToken $userToken)
     {
         $em = $this->_em;
-        $q = $this->createQueryBuilder("c");
-        $results = $q->leftJoin("c._pages", "p")
-            ->leftJoin("c._subcontent", "subcontent")
-            ->where("subcontent = :contentToReplace")
-            ->andWhere("p._leftnode > :cpageLeftnode")
-            ->andWhere("p._rightnode < :cpageRightnode")
-            ->setParameters(array(
-                "contentToReplace" => $oldContentSet,
-                "cpageLeftnode"    => $page->getLeftnode(),
-                "cpageRightnode"   => $page->getRightnode(),
-            ))
-            ->getQuery()->getResult()
+        $q = $this->createQueryBuilder('c');
+        $results = $q->leftJoin('c._pages', 'p')
+                        ->leftJoin('p._section', 'sp')
+                        ->leftJoin('c._subcontent', 'subcontent')
+                        ->where('subcontent = :contentToReplace')
+                        ->andWhere('sp._root = :cpageRoot')
+                        ->andWhere('sp._leftnode > :cpageLeftnode')
+                        ->andWhere('sp._rightnode < :cpageRightnode')
+                        ->setParameters(array(
+                            'contentToReplace' => $oldContentSet,
+                            'cpageRoot' => $page->getSection()->getRoot(),
+                            'cpageLeftnode' => $page->getLeftnode(),
+                            'cpageRightnode' => $page->getRightnode(),
+                        ))
+                        ->getQuery()->getResult()
         ;
 
         if ($results) {
             foreach ($results as $parentContentSet) {
                 /* create draft for the main container */
-                $draft = $em->getRepository('BackBee\ClassContent\Revision')->getDraft(
-                    $parentContentSet,
-                    $userToken,
-                    true
-                );
-
-                if (null !== $draft) {
+                if (null !== $draft = $em->getRepository('BackBee\ClassContent\Revision')->getDraft($parentContentSet, $userToken, true)) {
                     $parentContentSet->setDraft($draft);
                 }
-
                 /* Replace the old ContentSet by the new one */
                 $parentContentSet->replaceChildBy($oldContentSet, $newContentSet);
                 $em->persist($parentContentSet);
@@ -212,20 +208,29 @@ class ClassContentRepository extends EntityRepository
             if (false === empty($parentnode)) {
                 $nodes = $this->_em->getRepository('BackBee\NestedNode\Page')->findBy(array('_uid' => $parentnode));
                 if (count($nodes) != 0) {
-                    $has_page_joined = true;
-                    $query = 'SELECT c.uid FROM page p USE INDEX(IDX_SELECT_PAGE) LEFT JOIN content c ON c.node_uid=p.uid';
-                    $pageSelection = array();
-                    foreach ($nodes as $node) {
-                        if (true === $recursive) {
-                            $pageSelection[] = '(p.root_uid="'.$node->getRoot()->getUid().'" AND p.leftnode BETWEEN '.$node->getLeftnode().' AND '.$node->getRightnode().')';
-                        } else {
-                            $pageSelection[] = '(p.parent_uid="'.$node->getUid().'")';
+                    $subquery = $this->getEntityManager()
+                            ->getRepository('BackBuilder\NestedNode\Section')
+                            ->createQueryBuilder('s')
+                            ->select('s._uid');
+                    
+                    $qOR = $subquery->expr()->orX();
+                    if (true === $recursive) {
+                        foreach ($nodes as $node) {
+                            $qAND = $subquery->expr()->andX();
+                            $qAND->add($subquery->expr()->eq('s._root', $subquery->expr()->literal($node->getSection()->getRoot()->getUid())));
+                            $qAND->add($subquery->expr()->between('s._leftnode', $node->getLeftnode(), $node->getRightnode()));
+                            $qOR->add($qAND);
                         }
+                    } else {
+                        foreach ($nodes as $node) {
+                            $qOR->add($subquery->expr()->eq('s._parent', $subquery->expr()->literal($node->getSection()->getUid())));
+                        }                        
                     }
-
-                    if (count($pageSelection) != 0) {
-                        $where[] = '('.implode(' OR ', $pageSelection).')';
-                    }
+                    
+                    $subquery->andWhere($qOR);
+                    
+                    $query = 'SELECT c.uid FROM page p LEFT JOIN content c ON c.node_uid = p.uid';
+                    $where[] = 'p.section_uid IN (' . $subquery->getQuery()->getSQL() . ')';
 
                     if (true === $limitToOnline) {
                         $where[] = 'p.state IN (1, 3)';
@@ -235,15 +240,7 @@ class ClassContentRepository extends EntityRepository
                         $where[] = 'p.state < 4';
                     }
 
-                    if (true === property_exists('BackBee\NestedNode\Page', '_'.$selector['orderby'][0])) {
-                        $orderby[] = 'p.'.$selector['orderby'][0].' '.(count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
-                    } elseif (true === property_exists('BackBee\ClassContent\AClassContent', '_'.$selector['orderby'][0])) {
-                        $orderby[] = 'c.'.$selector['orderby'][0].' '.(count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
-                    } else {
-                        $join[] = 'LEFT JOIN indexation isort ON c.uid  = isort.content_uid';
-                        $where[] = 'isort.field = "'.$selector['orderby'][0].'"';
-                        $orderby[] = 'isort.value'.' '.(count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
-                    }
+                    $has_page_joined = true;
                 }
             }
         }
@@ -269,7 +266,6 @@ class ClassContentRepository extends EntityRepository
         //Optimize multipage query
         if (true === $multipage) {
             $query = str_replace('SELECT c.uid', 'SELECT SQL_CALC_FOUND_ROWS c.uid', $query);
-            $query = str_replace('USE INDEX(IDX_SELECT_PAGE)', ' ', $query);
         }
 
         $uids = $this->getEntityManager()
@@ -472,16 +468,17 @@ class ClassContentRepository extends EntityRepository
         $rsm->addFieldResult('c', 'uid', '_uid');
         $sql = "Select c.uid from content c LEFT JOIN content_has_subcontent sc ON c.uid = sc.content_uid";
         $sql .= " LEFT JOIN page as p ON p.contentset = sc.parent_uid";
+        $sql .= " LEFT JOIN section as sp ON p.section_uid = sp.uid";
         $sql .= " where p.uid = :selectedNodeUid";
-        $sql .= " AND p.root_uid = :selectedPageRoot";
-        $sql .= " AND p.leftnode >= :selectedPageLeftnode";
-        $sql .= " AND p.rightnode <= :selectedPageRightnode";
+        $sql .= " AND sp.root_uid = :selectedPageRoot";
+        $sql .= " AND sp.leftnode >= :selectedPageLeftnode";
+        $sql .= " AND sp.rightnode <= :selectedPageRightnode";
         if ($online) {
             $sql .= " AND p.state IN(:selectedPageState)";
         }
         $query = $this->_em->createNativeQuery($sql, $rsm);
         $query->setParameters(array(
-            "selectedPageRoot" => $selectedNode->getRoot(),
+            "selectedPageRoot" => $selectedNode->getSection()->getRoot(),
             "selectedNodeUid" => $selectedNode->getUid(),
             "selectedPageLeftnode" => $selectedNode->getLeftnode(),
             "selectedPageRightnode" => $selectedNode->getRightnode(), ));
@@ -670,6 +667,69 @@ class ClassContentRepository extends EntityRepository
     }
 
     /**
+     * Do stuf on update by post of the content editing form
+     * @param  \BackBee\ClassContent\AClassContent $content
+     * @param  stdClass                            $value
+     * @param  \BackBee\ClassContent\AClassContent $parent
+     * @return \BackBee\ClassContent\Element\file
+     * @throws ClassContentException               Occures on invalid content type provided
+     */
+    public function getValueFromPost(AClassContent $content, $value, AClassContent $parent = null)
+    {
+        /** enable form to edit more than one parameter */
+        if (true === (property_exists($value, "parameters"))) {
+            $parameters = (is_object($value->parameters)) ? array($value->parameters) : $value->parameters;
+            if (is_array($parameters) && !empty($parameters)) {
+                foreach ($parameters as $param) {
+                    if (is_object($param)) {
+                        if (true === property_exists($param, 'name') && true === property_exists($param, 'value')) {
+                            $content->setParam($param->name, $param->value, 'scalar');
+                        }
+                    }
+                }
+            }
+        }
+        /* if (true === property_exists($value, 'parameters') && true === is_object($value->parameters)) {
+          if (true === property_exists($value->parameters, 'name') && true === property_exists($value->parameters, 'value')) {
+          $content->setParam($value->parameters->name, $value->parameters->value);
+          }
+          } */
+        try {
+            $content->value = $this->formatPost($content, $value);
+            $content->value = html_entity_decode($content->value, ENT_COMPAT, 'UTF-8');
+        } catch (\Exception $e) {
+            // Nothing to do
+        }
+
+        return $content;
+    }
+
+    /**
+     * Format a post (place here all other stuffs)
+     * @param  \BackBee\ClassContent\AClassContent $content
+     * @param  stdClass                            $value
+     * @return string
+     */
+    public function formatPost(AClassContent $content, $value)
+    {
+        $val = $value->value;
+
+        switch (get_class($content)) {
+            case 'BackBee\ClassContent\Element\text':
+                //nettoyage des images => div aloha
+                $pattern = '{<div class=".*aloha-image.*".*>.?<(img[^\>]*).*>.*</div>}si';
+                if (true == preg_match($pattern, $val, $matches)) {
+                    if (2 == count($matches)) {
+                        $val = str_replace($matches[0], '<'.$matches[1].'/>', $val);
+                    }
+                }
+                break;
+        }
+
+        return $val;
+    }
+
+    /**
      * Do stuf removing content from the content editing form
      * @param  \BackBee\ClassContent\AClassContent $content
      * @param  type                                $value
@@ -728,30 +788,28 @@ class ClassContentRepository extends EntityRepository
 
     /**
      * Load content if need, the user's revision is also set
-     * @param  AClassContent $content
-     * @param  BBUserToken   $token
-     * @param  boolean       $checkoutOnMissing If true, checks out a new revision if none was found
-     * @return AClassContent
+     * @param  \BackBee\ClassContent\AClassContent $content
+     * @param  \BackBee\Security\Token\BBUserToken $token
+     * @param  boolean                             $checkoutOnMissing If true, checks out a new revision if none was found
+     * @return \BackBee\ClassContent\AClassContent
      */
-    public function load(AClassContent $content, BBUserToken $token = null, $checkoutOnMissing = false)
+    public function load(AClassContent $content, \BackBee\Security\Token\BBUserToken $token = null, $checkoutOnMissing = false)
     {
         $revision = null;
         if (null !== $token) {
-            $revision = $this->_em->getRepository('BackBee\ClassContent\Revision')->getDraft(
-                $content,
-                $token,
-                $checkoutOnMissing
-            );
+            $revision = $this->_em->getRepository('BackBee\ClassContent\Revision')->getDraft($content, $token, $checkoutOnMissing);
         }
 
         if (false === $content->isLoaded()) {
-            $classname = ClassUtils::getRealClass($content);
+            $classname = \Symfony\Component\Security\Core\Util\ClassUtils::getRealClass($content);
             if (null !== $refresh = $this->_em->find($classname, $content->getUid())) {
                 $content = $refresh;
             }
         }
 
-        $content->setDraft($revision);
+        if (null !== $content) {
+            $content->setDraft($revision);
+        }
 
         return $content;
     }
@@ -885,26 +943,5 @@ class ClassContentRepository extends EntityRepository
             ->executeQuery($sql, array('content_uids' => implode(', ', $content_uids)))
             ->fetchAll(\PDO::FETCH_COLUMN)
         ;
-    }
-
-    /**
-     * Returns classcontent if couple (type;uid) is valid
-     *
-     * @param string $type short namespace of a classcontent
-     *                     (full: BackBee\ClassContent\Block\paragraph => short: Block/paragraph)
-     * @param string $uid
-     *
-     * @return AClassContent
-     */
-    public function findOneByTypeAndUid($type, $uid)
-    {
-        $content = null;
-        $classname = AClassContent::getClassnameByContentType($type);
-
-        if (null === $content = $this->findOneBy(['_uid' => $uid])) {
-            throw new \InvalidArgumentException("No `$classname` exists with uid `$uid`.");
-        }
-
-        return $content;
     }
 }

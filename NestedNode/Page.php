@@ -1,43 +1,42 @@
 <?php
 
 /*
- * Copyright (c) 2011-2015 Lp digital system
+ * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBee.
+ * This file is part of BackBuilder5.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBee is distributed in the hope that it will be useful,
+ * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBee. If not, see <http://www.gnu.org/licenses/>.
- *
- * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBee\NestedNode;
+namespace BackBuilder\NestedNode;
 
+use BackBuilder\Security\Acl\Domain\AObjectIdentifiable;
+use BackBuilder\ClassContent\AClassContent;
+use BackBuilder\ClassContent\ContentSet;
+use BackBuilder\Exception\InvalidArgumentException;
+use BackBuilder\MetaData\MetaDataBag;
+use BackBuilder\Renderer\IRenderable;
+use BackBuilder\Site\Layout;
+use BackBuilder\Site\Site;
+use BackBuilder\Workflow\State;
+use BackBuilder\Util\Numeric;
 use Doctrine\Common\Collections\ArrayCollection;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
 
-use BackBee\ClassContent\AClassContent;
-use BackBee\ClassContent\ContentSet;
-use BackBee\Exception\InvalidArgumentException;
-use BackBee\MetaData\MetaDataBag;
-use BackBee\Renderer\IRenderable;
-use BackBee\Site\Layout;
-use BackBee\Site\Site;
-use BackBee\Workflow\State;
-
 /**
- * Page object in BackBee
+ * Page object in BackBuilder
  *
  * A page basically is an URI an a set of content defined for a website.
  * A page must have a layout defined to be displayed.
@@ -49,19 +48,28 @@ use BackBee\Workflow\State;
  * * STATE_HIDDEN
  * * STATE_DELETED
  *
- * @category    BackBee
- * @package     BackBee\NestedNode
+ * @category    BackBuilder
+ * @package     BackBuilder\NestedNode
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
- * @Entity(repositoryClass="BackBee\NestedNode\Repository\PageRepository")
- * @Table(name="page",indexes={@index(name="IDX_STATEP", columns={"state"}), @index(name="IDX_ARCHIVING", columns={"archiving"}), @index(name="IDX_PUBLISHING", columns={"publishing"}), @index(name="IDX_ROOT", columns={"root_uid"}), @index(name="IDX_PARENT", columns={"parent_uid"}), @index(name="IDX_SELECT_PAGE", columns={"root_uid", "leftnode", "rightnode", "state", "publishing", "archiving", "modified"}), @index(name="IDX_URL", columns={"site_uid", "url"}), @index(name="IDX_ROOT_RIGHT", columns={"root_uid", "rightnode"})})
+ * @author      Micael Malta <mmalta@nextinteractive.fr>
+ * @Entity(repositoryClass="BackBuilder\NestedNode\Repository\PageRepository")
+ * @Table(name="page",indexes=
+ * {
+ * @index(columns={"state"}),
+ * @index(columns={"level", "state", "publishing", "archiving", "modified"}),
+ * @index(columns={"url"}),
+ * @index(columns={"modified"}),
+ * }
+ * )
  * @HasLifecycleCallbacks
  * @fixtures(qty=1)
  *
  * @Serializer\ExclusionPolicy("all")
  */
-class Page extends ANestedNode implements IRenderable, DomainObjectInterface
+class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInterface
 {
+
     /**
      * State off-line: the page can not be displayed on the website
      * @var int
@@ -117,36 +125,12 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     protected $_uid;
 
     /**
-     * The owner site of this node
-     * @var \BackBee\Site\Site
-     * @ManyToOne(targetEntity="BackBee\Site\Site", fetch="EXTRA_LAZY")
-     * @JoinColumn(name="site_uid", referencedColumnName="uid")
-     */
-    protected $_site;
-
-    /**
      * The layout associated to the page
-     * @var \BackBee\Site\Layout
-     * @ManyToOne(targetEntity="BackBee\Site\Layout", inversedBy="_pages", fetch="EXTRA_LAZY")
-     * @JoinColumn(name="layout_uid", referencedColumnName="uid")
+     * @var \BackBuilder\Site\Layout
+     * @ManyToOne(targetEntity="BackBuilder\Site\Layout", inversedBy="_pages", fetch="EXTRA_LAZY")
+     * @JoinColumn(name="layout_uid", referencedColumnName="uid", nullable=false)
      */
     protected $_layout;
-
-    /**
-     * The root node, cannot be NULL.
-     * @var \BackBee\NestedNode\Page
-     * @ManyToOne(targetEntity="BackBee\NestedNode\Page", inversedBy="_descendants", fetch="EXTRA_LAZY")
-     * @JoinColumn(name="root_uid", referencedColumnName="uid")
-     */
-    protected $_root;
-
-    /**
-     * The parent node.
-     * @var \BackBee\NestedNode\Page
-     * @ManyToOne(targetEntity="BackBee\NestedNode\Page", inversedBy="_children", fetch="EXTRA_LAZY")
-     * @JoinColumn(name="parent_uid", referencedColumnName="uid")
-     */
-    protected $_parent;
 
     /**
      * The title of this page
@@ -202,15 +186,15 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Metadatas associated to the page
-     * @var \BackBee\MetaData\MetaDataBag
+     * @var \BackBuilder\MetaData\MetaDataBag
      * @Column(type="object", name="metadata", nullable=true)
      */
     protected $_metadata;
 
     /**
      * The associated ContentSet
-     * @var \BackBee\ClassContent\ContentSet
-     * @ManyToOne(targetEntity="BackBee\ClassContent\ContentSet", inversedBy="_pages", cascade={"persist", "remove"}, fetch="EXTRA_LAZY")
+     * @var \BackBuilder\ClassContent\ContentSet
+     * @ManyToOne(targetEntity="BackBuilder\ClassContent\ContentSet", inversedBy="_pages", cascade={"persist", "remove"}, fetch="EXTRA_LAZY")
      * @JoinColumn(name="contentset", referencedColumnName="uid")
      */
     protected $_contentset;
@@ -259,32 +243,61 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * The optional workflow state.
-     * @var \BackBee\Workflow\State
-     * @ManyToOne(targetEntity="BackBee\Workflow\State", fetch="EXTRA_LAZY")
+     * @var \BackBuilder\Workflow\State
+     * @ManyToOne(targetEntity="BackBuilder\Workflow\State", fetch="EXTRA_LAZY")
      * @JoinColumn(name="workflow_state", referencedColumnName="uid")
      */
     protected $_workflow_state;
 
     /**
-     * Descendants nodes.
-     * @var \Doctrine\Common\Collections\ArrayCollection
-     * @OneToMany(targetEntity="BackBee\NestedNode\Page", mappedBy="_root", fetch="EXTRA_LAZY")
-     */
-    protected $_descendants;
-
-    /**
-     * Direct children nodes.
-     * @var \Doctrine\Common\Collections\ArrayCollection
-     * @OneToMany(targetEntity="BackBee\NestedNode\Page", mappedBy="_parent", fetch="EXTRA_LAZY")
-     */
-    protected $_children;
-
-    /**
      * Revisions of the current page
      * @var \Doctrine\Common\Collections\ArrayCollection
-     * @OneToMany(targetEntity="BackBee\NestedNode\PageRevision", mappedBy="_page", fetch="EXTRA_LAZY")
+     * @OneToMany(targetEntity="BackBuilder\NestedNode\PageRevision", mappedBy="_page", fetch="EXTRA_LAZY")
      */
     protected $_revisions;
+
+    /**
+     * The nested node level in the tree.
+     * @var int
+     * @Column(type="integer", name="level", nullable=false)
+     */
+    protected $_level;
+
+    /**
+     * The order position in the section.
+     * @var int
+     * @Column(type="integer", name="position", nullable=false)
+     */
+    protected $_position;
+
+    /**
+     * The creation datetime
+     * @var \DateTime
+     * @Column(type="datetime", name="created", nullable=false)
+     */
+    protected $_created;
+
+    /**
+     * The last modification datetime
+     * @var \DateTime
+     * @Column(type="datetime", name="modified", nullable=false)
+     */
+    protected $_modified;
+
+    /**
+     * The section node.
+     * @var \BackBuilder\NestedNode\Section
+     * @ManyToOne(targetEntity="BackBuilder\NestedNode\Section", inversedBy="_pages", cascade={"persist"}, fetch="EXTRA_LAZY")
+     * @JoinColumn(name="section_uid", referencedColumnName="uid", nullable=false)
+     */
+    public $_section;
+
+    /**
+     * The associated page of this section
+     * @var \BackBuilder\NestedNode\Section
+     * @OneToOne(targetEntity="BackBuilder\NestedNode\Section", mappedBy="_page", cascade={"persist"}, fetch="EXTRA_LAZY")
+     */
+    public $_mainsection;
 
     /**
      * The type of the page
@@ -313,7 +326,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * Utility property used on cloning page
      * @var array
      */
-    public $cloning_datas;
+    public $cloning_data;
 
     /**
      * old state of current object (equals to null if it's not updated);
@@ -333,34 +346,50 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * Properties ignored while unserializing object
      * @var array
      */
-    protected $_unserialized_ignored = array('_created', '_modified', '_date', '_publishing', '_archiving', '_metadata', '_workflow_state');
+    protected $_unserialized_ignored = array('_section', '_created', '_modified', '_date', '_publishing', '_archiving', '_metadata', '_workflow_state');
 
     /**
      * Class constructor
-     * @param string $uid     The unique identifier of the page
-     * @param array  $options Initial options for the page:
-     *                        - title      the default title
-     *                        - url        the default url
+     * @param string $uid The unique identifier of the page
+     * @param array $options Initial options for the page:
+     *                         - main_section   the main section associated to the page
+     *                         - title          the default title
+     *                         - url            the default url
      */
     public function __construct($uid = null, $options = null)
     {
-        parent::__construct($uid);
-
-        if (true === is_array($options)) {
-            if (true === array_key_exists('title', $options)) {
-                $this->setTitle($options['title']);
-            }
-            if (true === array_key_exists('url', $options)) {
-                $this->setUrl($options['url']);
-            }
-        }
+        $default_values = array_merge(array('main_section' => null, 'title' => null, 'url' => null), (array) $options);
+        $this->setDefaultProperties($uid, $default_values['main_section'], $default_values['title'], $default_values['url']);
 
         $this->_contentset = new ContentSet();
         $this->_revisions = new ArrayCollection();
-        $this->_state = self::STATE_HIDDEN;
-        $this->_type = self::TYPE_DYNAMIC;
-        $this->_target = self::DEFAULT_TARGET;
-        $this->old_state = null;
+    }
+
+    /**
+     * Sets the default values to properties
+     * @param string $uid
+     * @param \BackBuilder\NestedNode\Section $section
+     * @param string $title
+     * @param string $url
+     * @return \BackBuilder\NestedNode\Page
+     */
+    private function setDefaultProperties($uid = null, Section $main_section = null, $title = null, $url = null, $target = self::DEFAULT_TARGET)
+    {
+        $this->_state = Page::STATE_HIDDEN;
+        $this->_type = Page::TYPE_DYNAMIC;
+        $this->_target = $target;
+        $this->_created = new \DateTime();
+        $this->_modified = new \DateTime();
+        $this->_title = $title;
+        $this->_url = $url;
+
+        if (null === $main_section) {
+            $main_section = new Section($uid, array('page' => $this));
+        }
+        $this->setMainSection($main_section);
+        $this->_uid = $main_section->getUid();
+
+        return $this;
     }
 
     /**
@@ -368,52 +397,47 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      */
     public function __clone()
     {
-        $current_uid = $this->_uid;
-
-        $this->cloning_datas = array(
+        $source_uid = $this->_uid;
+        $this->cloning_data = array(
             'pages' => array(),
-            'contents' => array(),
+            'contents' => array()
         );
 
-        if ($this->_uid) {
-            if (null !== $this->_contentset && null !== $this->getLayout()) {
-                $this->_contentset = $this->_contentset->createClone($this);
-            } else {
-                $this->_contentset = new ContentSet();
-            }
-
-            $this->_uid = md5(uniqid('', true));
-            $this->_leftnode = 1;
-            $this->_rightnode = $this->_leftnode + 1;
-            $this->_level = 0;
-            $this->_created = new \DateTime();
-            $this->_modified = new \DateTime();
-            $this->_parent = null;
-            $this->_root = $this;
-            $this->_state = Page::STATE_OFFLINE;
-            $this->_type = Page::TYPE_DYNAMIC;
-
-            $this->_children->clear();
-            $this->_descendants->clear();
-            $this->_revisions->clear();
-
-            $this->cloning_datas['pages'][$current_uid] = $this;
+        if (null !== $this->_contentset && null !== $this->getLayout()) {
+            $this->_contentset = $this->_contentset->createClone($this);
+        } else {
+            $this->_contentset = new ContentSet();
         }
+
+        if (true === $this->hasMainSection()) {
+            // Main section has to be cloned also
+            $this->setDefaultProperties(null, clone $this->_mainsection, $this->_title, $this->_url, $this->_target);
+        } else {
+            // The new page keeps the same section
+            $section = $this->getSection();
+            $this->setDefaultProperties(null, null, $this->_title, $this->_url, $this->_target);
+            $this->setSection($section);
+        }
+
+        $this->_revisions = new ArrayCollection();
+
+        $this->cloning_data['pages'][$source_uid] = $this;
     }
 
     /**
      * Returns the owner site of this node.
-     * @return \BackBee\Site\Site
+     * @return \Backbuilder\Site\Site
      * @codeCoverageIgnore
      */
     public function getSite()
     {
-        return $this->_site;
+        return $this->getSection()->getSite();
     }
 
     /**
      * Returns the main contentset associated to the node.
-     * @return \BackBee\ClassContent\ContentSet
+     * @return \BackBuilder\ClassContent\ContentSet
+     * @codeCoverageIgnore
      */
     public function getContentSet()
     {
@@ -426,7 +450,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Return sthe layout of the page.
-     * @return \BackBee\Site\Layout
+     * @return \BackBuilder\Site\Layout
      * @codeCoverageIgnore
      */
     public function getLayout()
@@ -515,7 +539,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Returns the associated metadata if defined
-     * @return \BackBee\MetaData\MetaDataBag|NULL
+     * @return \BackBuilder\MetaData\MetaDataBag|NULL
      * @codeCoverageIgnore
      */
     public function getMetaData()
@@ -566,6 +590,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     /**
      * Returns the collection of revisions.
      * @return \Doctrine\Common\Collections\ArrayCollection
+     * @codeCoverageIgnore
      */
     public function getRevisions()
     {
@@ -603,6 +628,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
             'left' => $this->getLeftnode(),
             'right' => $this->getRightnode(),
             'level' => $this->getLevel(),
+            'position' => $this->getPosition()
         );
 
         if (null !== $var) {
@@ -618,7 +644,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Returns the worflow state if defined, NULL otherwise
-     * @return \BackBee\Workflow\State
+     * @return \BackBuilder\Workflow\State
      * @codeCoverageIgnore
      */
     public function getWorkflowState()
@@ -694,20 +720,19 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets the associated site
-     * @param  \BackBee\NestedNode\Site $site
-     * @return \BackBee\NestedNode\Page
+     * @param  \BackBuilder\NestedNode\Site $site
+     * @return \BackBuilder\NestedNode\Page
      */
     public function setSite(Site $site = null)
     {
-        $this->_site = $site;
-
+        $this->getSection()->setSite($site);
         return $this;
     }
 
     /**
      * Sets the main contentset associated to the node.
-     * @param  \BackBee\ClassContent\ContentSet $contentset
-     * @return \BackBee\NestedNode\ANestedNode
+     * @param  \BackBuilder\ClassContent\ContentSet $contentset
+     * @return \BackBuilder\NestedNode\ANestedNode
      */
     public function setContentset(ContentSet $contentset)
     {
@@ -718,8 +743,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets the date of the page
-     * @param  \DateTime                $date
-     * @return \BackBee\NestedNode\Page
+     * @param  \DateTime                    $date
+     * @return \BackBuilder\NestedNode\Page
      */
     public function setDate(\DateTime $date = null)
     {
@@ -731,9 +756,9 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     /**
      * Sets the layout for the page.
      * Adds as much ContentSet to the page main ContentSet than defined zones in layout
-     * @param  \BackBee\Site\Layout                $layout
-     * @param  \BackBee\ClassContent\AClassContent $toPushInMainZone
-     * @return \BackBee\NestedNode\Page
+     * @param  \BackBuilder\Site\Layout                $layout
+     * @param  \BackBuilder\ClassContent\AClassContent $toPushInMainZone
+     * @return \BackBuilder\NestedNode\Page
      */
     public function setLayout(Layout $layout, AClassContent $toPushInMainZone = null)
     {
@@ -759,7 +784,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
                 $contentset = $this->getInheritedContent($i, $contentset);
             } elseif ($zone->defaultClassContent) {
                 // New default content push
-                $contentset->push($this->createNewDefaultContent('BackBee\ClassContent\\'.$zone->defaultClassContent, $zone->mainZone));
+                $contentset->push($this->createNewDefaultContent('BackBuilder\ClassContent\\'.$zone->defaultClassContent, $zone->mainZone));
             }
 
             $this->getContentSet()->push($contentset);
@@ -770,8 +795,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets the alternate title of the page.
-     * @param  string                   $alttitle
-     * @return \BackBee\NestedNode\Page
+     * @param  string                       $alttitle
+     * @return \BackBuilder\NestedNode\Page
      */
     public function setAltTitle($alttitle)
     {
@@ -779,10 +804,11 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
         return $this;
     }
+
     /**
      * Sets the title of the page.
-     * @param  string                   $title
-     * @return \BackBee\NestedNode\Page
+     * @param  string                       $title
+     * @return \BackBuilder\NestedNode\Page
      */
     public function setTitle($title)
     {
@@ -793,8 +819,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets the URL of the page
-     * @param  string                   $url
-     * @return \BackBee\NestedNode\Page
+     * @param  string                       $url
+     * @return \BackBuilder\NestedNode\Page
      */
     public function setUrl($url)
     {
@@ -805,8 +831,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets the target if a permanent redirect is defined
-     * @param  string                   $target
-     * @return \BackBee\NestedNode\Page
+     * @param  string                       $target
+     * @return \BackBuilder\NestedNode\Page
      */
     public function setTarget($target)
     {
@@ -817,8 +843,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets a permanent redirect
-     * @param  string                   $redirect
-     * @return \BackBee\NestedNode\Page
+     * @param  string                       $redirect
+     * @return \BackBuilder\NestedNode\Page
      */
     public function setRedirect($redirect)
     {
@@ -829,8 +855,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets the associated metadata
-     * @param  \BackBee\MetaData\MetaDataBag $metadata
-     * @return \BackBee\NestedNode\Page
+     * @param  \BackBuilder\MetaData\MetaDataBag $metadata
+     * @return \BackBuilder\NestedNode\Page
      */
     public function setMetaData(MetaDataBag $metadata = null)
     {
@@ -841,8 +867,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets the state
-     * @param  int                      $state
-     * @return \BackBee\NestedNode\Page
+     * @param  int                          $state
+     * @return \BackBuilder\NestedNode\Page
      */
     public function setState($state)
     {
@@ -853,8 +879,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets the publishing date
-     * @param  \DateTime                $publishing
-     * @return \BackBee\NestedNode\Page
+     * @param  \DateTime                    $publishing
+     * @return \BackBuilder\NestedNode\Page
      */
     public function setPublishing($publishing = null)
     {
@@ -865,8 +891,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets the archiving date
-     * @param  \DateTime                $archiving
-     * @return \BackBee\NestedNode\Page
+     * @param  \DateTime                    $archiving
+     * @return \BackBuilder\NestedNode\Page
      */
     public function setArchiving($archiving = null)
     {
@@ -878,7 +904,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     /**
      * Sets a collection of revisions for the page
      * @param  \Doctrine\Common\Collections\ArrayCollection $revisions
-     * @return \BackBee\NestedNode\Page
+     * @return \BackBuilder\NestedNode\Page
      */
     public function setRevisions(ArrayCollection $revisions)
     {
@@ -889,8 +915,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets the workflow state
-     * @param  \BackBee\Workflow\State  $state
-     * @return \BackBee\NestedNode\Page
+     * @param  \BackBuilder\Workflow\State  $state
+     * @return \BackBuilder\NestedNode\Page
      */
     public function setWorkflowState(State $state = null)
     {
@@ -901,8 +927,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Returns the inherited zone according to the provided ContentSet
-     * @param  \BackBee\ClassContent\ContentSet $contentSet
-     * @return \StdClass|NULL                   The inherited zone if found
+     * @param  \BackBuilder\ClassContent\ContentSet $contentSet
+     * @return \StdClass|NULL                       The inherited zone if found
      */
     public function getInheritedContensetZoneParams(ContentSet $contentSet)
     {
@@ -931,7 +957,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Returns the index of the provided ContentSet in the main ContentSetif found, FALSE otherwise
-     * @param  \BackBee\ClassContent\ContentSet $contentSet
+     * @param  \BackBuilder\ClassContent\ContentSet $contentSet
      * @return int|FALSE
      */
     public function getRootContentSetPosition(ContentSet $contentSet)
@@ -941,8 +967,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Returns the parent ContentSet in the same zone, FALSE if it is not found
-     * @param  \BackBee\ClassContent\ContentSet      $contentSet
-     * @return \BackBeeClassContent\ContentSet|FALSE
+     * @param  \BackBuilder\ClassContent\ContentSet      $contentSet
+     * @return \BackBuilderClassContent\ContentSet|FALSE
      */
     public function getParentZoneAtSamePositionIfExists(ContentSet $contentSet)
     {
@@ -1025,7 +1051,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Is the ContentSet is linked to his parent
-     * @param  \BackBee\ClassContent\ContentSet $contentset
+     * @param  \BackBuilder\ClassContent\ContentSet $contentset
      * @return Boolean
      */
     public function isLinkedToHisParentBy(ContentSet $contentset = null)
@@ -1042,10 +1068,10 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Replaces the ContentSet of the page
-     * @param  \BackBee\ClassContent\ContentSet $contentToReplace
-     * @param  \BackBee\ClassContent\ContentSet $newContentSet
-     * @param  Boolean                          $checkContentsLinkToParent
-     * @return \BackBee\ClassContent\ContentSet
+     * @param  \BackBuilder\ClassContent\ContentSet $contentToReplace
+     * @param  \BackBuilder\ClassContent\ContentSet $newContentSet
+     * @param  Boolean                              $checkContentsLinkToParent
+     * @return \BackBuilder\ClassContent\ContentSet
      */
     public function replaceRootContentSet(ContentSet $contentToReplace, ContentSet $newContentSet, $checkContentsLinkToParent = true)
     {
@@ -1067,33 +1093,54 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      */
     public function toArray()
     {
-        $result = parent::toArray();
-
-        $result['siteuid'] = (null !== $this->getSite()) ? $this->getSite()->getUid() : null;
-        $result['title'] = $this->getTitle();
-        $result['alttitle'] = $this->getAltTitle();
-        $result['url'] = $this->getUrl();
-        $result['target'] = $this->getTarget();
-        $result['redirect'] = $this->getRedirect();
-        $result['state'] = $this->getState();
-        $result['date'] = (null !== $this->getDate()) ? $this->getDate()->getTimestamp() : null;
-        $result['publishing'] = (null !== $this->getPublishing()) ? $this->getPublishing()->getTimestamp() : null;
-        $result['archiving'] = (null !== $this->getArchiving()) ? $this->getArchiving()->getTimestamp() : null;
-        $result['metadata'] = (null !== $this->getMetaData()) ? $this->getMetaData()->toArray() : null;
-        $result['layout_uid'] = (null !== $this->getLayout()) ? $this->getLayout()->getUid() : null;
-        $result['workflow_state'] = (null !== $this->getWorkflowState()) ? $this->getWorkflowState()->getCode() : null;
-
-        return $result;
+        return array(
+            'id' => 'node_' . $this->getUid(),
+            'rel' => (true === $this->isLeaf()) ? 'leaf' : 'folder',
+            'uid' => $this->getUid(),
+            'rootuid' => $this->getRoot()->getUid(),
+            'parentuid' => (null !== $this->getParent()) ? $this->getParent()->getUid() : null,
+            'created' => $this->getCreated()->getTimestamp(),
+            'modified' => $this->getModified()->getTimestamp(),
+            'isleaf' => $this->isLeaf(),
+            'siteuid' => (null !== $this->getSite()) ? $this->getSite()->getUid() : null,
+            'title' => $this->getTitle(),
+            'alttitle' => $this->getAltTitle(),
+            'url' => $this->getUrl(),
+            'target' => $this->getTarget(),
+            'redirect' => $this->getRedirect(),
+            'state' => $this->getState(),
+            'date' => (null !== $this->getDate()) ? $this->getDate()->getTimestamp() : null,
+            'publishing' => (null !== $this->getPublishing()) ? $this->getPublishing()->getTimestamp() : null,
+            'archiving' => (null !== $this->getArchiving()) ? $this->getArchiving()->getTimestamp() : null,
+            'metadata' => (null !== $this->getMetaData()) ? $this->getMetaData()->toArray() : null,
+            'layout_uid' => (null !== $this->getLayout()) ? $this->getLayout()->getUid() : null,
+            'workflow_state' => (null !== $this->getWorkflowState()) ? $this->getWorkflowState()->getCode() : null,
+            'section' => $this->hasMainSection()
+        );
     }
 
     /**
-     * Constructs the node from a string or object
-     * @param  mixed                                       $serialized The string representation of the object.
-     * @return \BackBee\NestedNode\ANestedNode
-     * @throws \BackBee\Exception\InvalidArgumentException Occurs if the serialized data can not be decode or,
-     *                                                                with strict mode, if a property does not exists
+     * Returns a string representation of page
+     * @return string
+     * @codeCoverageIgnore
      */
-    public function unserialize($serialized, $strict = false)
+    public function serialize()
+    {
+        $serialized = new \stdClass();
+        foreach ($this->toArray() as $key => $value) {
+            $serialized->$key = $value;
+        }
+
+        return json_encode($serialized);
+    }
+
+    /**
+     * Constructs the page from a string or object
+     * @param mixed $serialized The string representation of the object.
+     * @return \BackBuilder\NestedNode\Page
+     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the serialized data can not be decode
+     */
+    public function unserialize($serialized)
     {
         if (false === is_object($serialized)) {
             if (null === $serialized = json_decode($serialized)) {
@@ -1101,7 +1148,16 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
             }
         }
 
-        parent::unserialize($serialized, $strict);
+        foreach (get_object_vars($serialized) as $property => $value) {
+            $property = '_' . $property;
+            if (true === in_array($property, $this->_unserialized_ignored)) {
+                continue;
+            } else if (true === property_exists($this, $property)) {
+                $this->$property = $value;
+            }
+        }
+
+        $this->setSection($this->getSection()->unserialize($serialized, false));
 
         if (true === property_exists($serialized, 'date')) {
             $this->setDateTimeValue('_date', $serialized->date);
@@ -1148,9 +1204,23 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     }
 
     /**
+     * Returns chidren of ths page
+     * @return array
+     * @deprecated since version 0.11
+     */
+    public function getChildren()
+    {
+        if (false === $this->hasMainSection()) {
+            return array();
+        }
+        
+        return $this->getSection()->getPages();
+    }
+
+    /**
      * Looks for at least one online children
      * @return boolean TRUE if at least one children of the page is online
-     * @deprecated
+     * @deprecated since version 0.11
      */
     public function hasChildrenVisible()
     {
@@ -1165,8 +1235,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Returns an array of the ascendants
-     * @param  \BackBee\NestedNode\Page $page
-     * @param  array                    $breadcrumb
+     * @param  \BackBuilder\NestedNode\Page $page
+     * @param  array                        $breadcrumb
      * @return array
      * @deprecated
      */
@@ -1211,7 +1281,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * old_state property setter
-     * @return \BackBee\NestedNode\Page
+     * @return \BackBuilder\NestedNode\Page
      */
     public function setOldState($v)
     {
@@ -1222,8 +1292,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Tells whether getUrl() should return the redirect url or BB5 url
-     * @param  bool                     $useUrlRedirect
-     * @return \BackBee\NestedNode\Page
+     * @param  bool                         $useUrlRedirect
+     * @return \BackBuilder\NestedNode\Page
      */
     public function setUseUrlRedirect($useUrlRedirect)
     {
@@ -1248,7 +1318,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      */
     public function getTemplateName()
     {
-        return str_replace(array("BackBee".NAMESPACE_SEPARATOR."NestedNode".NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR), array("", DIRECTORY_SEPARATOR), get_class($this));
+        return str_replace(array("BackBuilder".NAMESPACE_SEPARATOR."NestedNode".NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR), array("", DIRECTORY_SEPARATOR), get_class($this));
     }
 
     /**
@@ -1275,7 +1345,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      */
     public function getSiteUid()
     {
-        return null !== $this->_site ? $this->_site->getUid() : '';
+        return null !== $this->getSection()->getSite() ? $this->getSection()->getSite()->getUid() : '';
     }
 
     /**
@@ -1284,7 +1354,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      */
     public function getSiteLabel()
     {
-        return null !== $this->_site ? $this->_site->getLabel() : '';
+        return null !== $this->getSection()->getSite() ? $this->getSection()->getSite()->getLabel() : '';
     }
 
     /**
@@ -1364,7 +1434,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     {
         if (false === ($date instanceof \DateTime) && false === is_int($date)) {
             throw new InvalidArgumentException(
-                'Page::convertTimestampToDateTime() expect date argument to be an integer or an instance of \DateTime'
+            'Page::convertTimestampToDateTime() expect date argument to be an integer or an instance of \DateTime'
             );
         } elseif (is_int($date)) {
             $date = new \DateTime(date('c', $date));
@@ -1375,9 +1445,9 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Assign DateTime object to a property giving a time stamp
-     * @param  string                   $property
-     * @param  int                      $timestamp
-     * @return \BackBee\NestedNode\Page
+     * @param  string                       $property
+     * @param  int                          $timestamp
+     * @return \BackBuilder\NestedNode\Page
      */
     private function setDateTimeValue($property, $timestamp = null)
     {
@@ -1394,9 +1464,9 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Returns the inherited content from parent, $default if not found
-     * @param  int                                 $index
-     * @param  \BackBee\ClassContent\AClassContent $default
-     * @return \BackBee\ClassContent\AClassContent
+     * @param  int                                     $index
+     * @param  \BackBuilder\ClassContent\AClassContent $default
+     * @return \BackBuilder\ClassContent\AClassContent
      */
     private function getInheritedContent($index, AClassContent $default)
     {
@@ -1413,9 +1483,9 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Creates a new default content to be pushed in layout columns
-     * @param  string                              $classname
-     * @param  boolean                             $mainzone
-     * @return \BackBee\ClassContent\AClassContent
+     * @param  string                                  $classname
+     * @param  boolean                                 $mainzone
+     * @return \BackBuilder\ClassContent\AClassContent
      */
     private function createNewDefaultContent($classname, $mainzone = false)
     {
@@ -1445,11 +1515,290 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     }
 
     /**
+     * Returns te unique identifier.
+     * @return string
+     * @codeCoverageIgnore
+     */
+    public function getUid()
+    {
+        return $this->_uid;
+    }
+
+    /**
+     * Returns the level
+     * @return int
+     * @codeCoverageIgnore
+     */
+    public function getLevel()
+    {
+        return $this->_level;
+    }
+
+    /**
+     * Sets the level.
+     * @param int $level
+     * @return \BackBuilder\NestedNode\Page
+     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the value can not be cast to positive integer
+     */
+    public function setLevel($level)
+    {
+        if (false === Numeric::isPositiveInteger($level, false)) {
+            throw new InvalidArgumentException('A nested level must be a positive integer.');
+        }
+
+        $this->_level = $level;
+        return $this;
+    }
+
+    /**
+     * Returns the order position
+     * @return int
+     * @codeCoverageIgnore
+     */
+    public function getPosition()
+    {
+        return $this->_position;
+    }
+
+    /**
+     * Sets the position.
+     * @param int $position
+     * @return \BackBuilder\NestedNode\Page
+     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the value can not be cast to positive integer
+     */
+    public function setPosition($position)
+    {
+        if (false === Numeric::isPositiveInteger($position, false)) {
+            throw new InvalidArgumentException('A position must be a positive integer.');
+        }
+
+        $this->_position = $position;
+        return $this;
+    }
+
+    /**
+     * Returns the creation date.
+     * @return \DateTime
+     * @codeCoverageIgnore
+     */
+    public function getCreated()
+    {
+        return $this->_created;
+    }
+
+    /**
+     * Returns the last modified date.
+     * @return \DateTime
+     * @codeCoverageIgnore
+     */
+    public function getModified()
+    {
+        return $this->_modified;
+    }
+
+    /**
+     * Sets the date modified
+     * @param \Datetime $modified
+     * @return \BackBuilder\NestedNode\Page
+     */
+    public function setModified(\Datetime $modified)
+    {
+        $this->_modified = $modified;
+        return $this;
+    }
+
+    /**
+     * Is this page has an associated section
+     * @return boolean
+     */
+    public function hasMainSection()
+    {
+        return null !== $this->getMainSection();
+    }
+
+    /**
+     * Return the associated main section if exists, NULL otherwise
+     * @return \BackBuilder\NestedNode\Section|NULL
+     * @codeCoverageIgnore
+     */
+    public function getMainSection()
+    {
+        return $this->_mainsection;
+    }
+
+    /**
+     * Sets the main section for this page
+     * @param \BackBuilder\NestedNode\Section $section
+     * @return \BackBuilder\NestedNode\Page
+     */
+    public function setMainSection(Section $section)
+    {
+        if ($section === $this->_mainsection) {
+            return $this;
+        }
+
+        $this->_mainsection = $section;
+        $this->_position = 0;
+        $this->_level = $section->getLevel();
+        $section->setPage($this);
+
+        return $this->setSection($section);
+    }
+
+    /**
+     * Sets the section for this page
+     * @param \BackBuilder\NestedNode\Section $section
+     * @return \BackBuilder\NestedNode\Page
+     */
+    public function setSection(Section $section)
+    {
+        if ($section !== $this->_mainsection) {
+            $this->_mainsection = null;
+            $this->_level = $section->getLevel() + 1;
+            
+            if (0 === $this->_position) {
+                $this->_position = 1;
+            }
+        }
+
+        $this->_section = $section;
+        return $this;
+    }
+
+    /**
+     * Returns the section of this page
+     * @return \BackBuilder\NestedNode\Section
+     */
+    public function getSection()
+    {
+        if (null === $this->_section) {
+            $this->setSection(new Section($this->getUid(), array('page' => $this)));
+        }
+
+        return $this->_section;
+    }
+
+    /**
+     * Is the page is a leaf ?
+     * @return Boolean TRUE if the node if a leaf of tree, FALSE otherwise
+     */
+    public function isLeaf()
+    {
+        return (true === $this->hasMainSection()) ? $this->getSection()->isLeaf() : true;
+    }
+
+    /**
+     * Is this page is an ancestor of the provided one ?
+     * @param \BackBuilder\NestedNode\Page  $page
+     * @param Boolean                       $strict Optional, if TRUE (default) this page is excluded of ancestors list
+     * @return Boolean                      TRUE if this page is an anscestor of provided page, FALSE otherwise
+     */
+    public function isAncestorOf(Page $page, $strict = true)
+    {
+        if (false === $this->hasMainSection()) {
+            return ($this === $page && false === $strict);
+        }
+        
+        return $this->getSection()->isAncestorOf($page->getSection(), $strict) || $page->getParent() === $this;
+    }
+
+    /**
+     * Is this page is a descendant of the provided one ?
+     * @param \BackBuilder\NestedNode\Page  $page
+     * @param Boolean                       $strict Optional, if TRUE (default) this page is excluded of descendants list
+     * @return Boolean                      TRUE if this page is a descendant of provided page, FALSE otherwise
+     */
+    public function isDescendantOf(Page $page, $strict = true)
+    {
+        if ($this === $page) {
+            return !$strict;
+        }
+
+        if (false === $this->hasMainSection()) {
+            return $page === $this->getParent() || $this->getSection()->isDescendantOf($page->getSection());
+        }
+
+        return $this->getSection()->isDescendantOf($page->getSection(), $strict);
+    }
+
+    /**
+     * Returns the root page.
+     * @return \BackBuilder\NestedNode\Page
+     */
+    public function getRoot()
+    {
+        return $this->getSection()->getRoot()->getPage();
+    }
+
+    /**
+     * Is the page a root ?
+     * @return Boolean TRUE if the page is root of tree, FALSE otherwise
+     */
+    public function isRoot()
+    {
+        return (true === $this->hasMainSection() && null === $this->getSection()->getParent());
+    }
+
+    /**
+     * Sets the parent node.
+     * @param \BackBuilder\NestedNode\Page $parent
+     * @return \BackBuilder\NestedNode\Page
+     */
+    public function setParent(Page $parent)
+    {
+        if (false === $parent->hasMainSection()) {
+            throw new InvalidArgumentException('A parent page must be a section');
+        }
+
+        if (false === $this->hasMainSection() || true === $this->isRoot()) {
+            $this->setSection($parent->getSection());
+        } else {
+            $this->getSection()->setParent($parent->getSection());
+        }
+
+        return $this;
+    }
+
+    /**
+     * Returns the parent page, NULL if this page is root
+     * @return \BackBuilder\NestedNode\Page|NULL
+     */
+    public function getParent()
+    {
+        $section = $this->getSection();
+        if (true === $this->hasMainSection()) {
+            return (true === $section->isRoot()) ? null : $section->getParent()->getPage();
+        }
+
+        return $section->getPage();
+    }
+
+    /**
+     * Returns the nested node left position.
+     * @return int
+     */
+    public function getLeftnode()
+    {
+        return $this->getSection()->getLeftnode();
+    }
+
+    /**
+     * Returns the nested node right position.
+     * @return int
+     */
+    public function getRightnode()
+    {
+        return $this->getSection()->getRightnode();
+    }
+
+    /**
      * @Serializer\VirtualProperty
      * @Serializer\Type("boolean")
+     * @codeCoverageIgnore
      */
     public function hasChildren()
     {
-        return parent::hasChildren();
+        return $this->getSection()->hasChildren();
     }
+
 }

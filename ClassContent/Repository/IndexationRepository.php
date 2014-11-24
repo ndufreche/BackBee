@@ -1,35 +1,32 @@
 <?php
 
 /*
- * Copyright (c) 2011-2015 Lp digital system
+ * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBee.
+ * This file is part of BackBuilder5.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBee is distributed in the hope that it will be useful,
+ * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBee. If not, see <http://www.gnu.org/licenses/>.
- *
- * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBee\ClassContent\Repository;
+namespace BackBuilder\ClassContent\Repository;
 
+use BackBuilder\Site\Site;
+use BackBuilder\NestedNode\Page;
+use BackBuilder\ClassContent\AClassContent;
+use BackBuilder\Util\Doctrine\DriverFeatures;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadata;
-
-use BackBee\ClassContent\AClassContent;
-use BackBee\NestedNode\Page;
-use BackBee\Site\Site;
-use BackBee\Util\Doctrine\DriverFeatures;
 
 /**
  * The Indexation repository provides methods to update and access to the
@@ -39,8 +36,8 @@ use BackBee\Util\Doctrine\DriverFeatures;
  *     - idx_page_content: join table between a page and its contents
  *     - idx_site_content: join table between a site and its contents
  *
- * @category    BackBee
- * @package     BackBee\ClassContent
+ * @category    BackBuilder
+ * @package     BackBuilder\ClassContent
  * @subpackage  Repository
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
@@ -51,7 +48,13 @@ class IndexationRepository extends EntityRepository
      * Is REPLACE command is supported
      * @var boolean
      */
-    private $_replace_supported;
+    private $replace_supported;
+
+    /**
+     * Is multi values insertions command is supported
+     * @var boolean
+     */
+    private $multi_values_supported;
 
     /**
      * Initializes a new EntityRepository
@@ -62,13 +65,14 @@ class IndexationRepository extends EntityRepository
     {
         parent::__construct($em, $class);
 
-        $this->_replace_supported = DriverFeatures::replaceSupported($em->getConnection()->getDriver());
+        $this->replace_supported = DriverFeatures::replaceSupported($em->getConnection()->getDriver());
+        $this->multi_values_supported = DriverFeatures::multiValuesSupported($em->getConnection()->getDriver());
     }
 
     /**
      * Replaces content in optimized tables
-     * @param  \BackBee\ClassContent\AClassContent                   $content
-     * @return \BackBee\ClassContent\Repository\IndexationRepository
+     * @param  \BackBuilder\ClassContent\AClassContent                   $content
+     * @return \BackBuilder\ClassContent\Repository\IndexationRepository
      */
     public function replaceOptContentTable(AClassContent $content)
     {
@@ -77,13 +81,13 @@ class IndexationRepository extends EntityRepository
         }
 
         $command = 'REPLACE';
-        if (false === $this->_replace_supported) {
+        if (false === $this->replace_supported) {
             // REPLACE command not supported, remove first then insert
             $this->removeOptContentTable($content);
             $command = 'INSERT';
         }
 
-        $meta = $this->_em->getClassMetadata('BackBee\ClassContent\Indexes\OptContentByModified');
+        $meta = $this->_em->getClassMetadata('BackBuilder\ClassContent\Indexes\OptContentByModified');
         $query = $command.' INTO '.$meta->getTableName().
                 ' ('.$meta->getColumnName('_uid').', '.
                 $meta->getColumnName('_label').', '.
@@ -116,13 +120,13 @@ class IndexationRepository extends EntityRepository
 
     /**
      * Removes content from optimized table
-     * @param  \BackBee\ClassContent\AClassContent                   $content
-     * @return \BackBee\ClassContent\Repository\IndexationRepository
+     * @param  \BackBuilder\ClassContent\AClassContent                   $content
+     * @return \BackBuilder\ClassContent\Repository\IndexationRepository
      */
     public function removeOptContentTable(AClassContent $content)
     {
         $this->getEntityManager()
-                ->createQuery('DELETE FROM BackBee\ClassContent\Indexes\OptContentByModified o WHERE o._uid=:uid')
+                ->createQuery('DELETE FROM BackBuilder\ClassContent\Indexes\OptContentByModified o WHERE o._uid=:uid')
                 ->setParameter('uid', $content->getUid())
                 ->execute();
 
@@ -131,9 +135,9 @@ class IndexationRepository extends EntityRepository
 
     /**
      * Replaces site-content indexes for an array of contents in a site
-     * @param  \BackBee\Site\Site                                    $site
-     * @param  array                                                 $contents An array of AClassContent
-     * @return \BackBee\ClassContent\Repository\IndexationRepository
+     * @param  \BackBuilder\Site\Site                                    $site
+     * @param  array                                                     $contents An array of AClassContent
+     * @return \BackBuilder\ClassContent\Repository\IndexationRepository
      */
     public function replaceIdxSiteContents(Site $site, array $contents)
     {
@@ -144,9 +148,9 @@ class IndexationRepository extends EntityRepository
 
     /**
      * Removes site-content indexes for an array of contents in a site
-     * @param  \BackBee\Site\Site                                    $site
-     * @param  array                                                 $contents An array of AClassContent
-     * @return \BackBee\ClassContent\Repository\IndexationRepository
+     * @param  \BackBuilder\Site\Site                                    $site
+     * @param  array                                                     $contents An array of AClassContent
+     * @return \BackBuilder\ClassContent\Repository\IndexationRepository
      */
     public function removeIdxSiteContents(Site $site, array $contents)
     {
@@ -155,8 +159,8 @@ class IndexationRepository extends EntityRepository
 
     /**
      * Replaces content-content indexes for an array of contents
-     * @param  array                                                 $contents An array of AClassContent
-     * @return \BackBee\ClassContent\Repository\IndexationRepository
+     * @param  array                                                     $contents An array of AClassContent
+     * @return \BackBuilder\ClassContent\Repository\IndexationRepository
      */
     public function replaceIdxContentContents(array $contents)
     {
@@ -179,8 +183,8 @@ class IndexationRepository extends EntityRepository
 
     /**
      * Removes content-content indexes for an array of contents
-     * @param  array                                                 $contents An array of AClassContent
-     * @return \BackBee\ClassContent\Repository\IndexationRepository
+     * @param  array                                                     $contents An array of AClassContent
+     * @return \BackBuilder\ClassContent\Repository\IndexationRepository
      */
     public function removeIdxContentContents(array $contents)
     {
@@ -189,26 +193,37 @@ class IndexationRepository extends EntityRepository
 
     /**
      * Replaces or inserts a set of Site-Content indexes
-     * @param  string                                                $site_uid
-     * @param  array                                                 $content_uids
-     * @return \BackBee\ClassContent\Repository\IndexationRepository
+     * @param  string                                                    $site_uid
+     * @param  array                                                     $content_uids
+     * @return \BackBuilder\ClassContent\Repository\IndexationRepository
      */
     public function replaceIdxSiteContentsUid($site_uid, array $content_uids)
     {
         if (0 < count($content_uids)) {
             $command = 'REPLACE';
-            if (false === $this->_replace_supported) {
+            if (false === $this->replace_supported) {
                 // REPLACE command not supported, remove first then insert
                 $this->_removeIdxSiteContents($site_uid, $content_uids);
                 $command = 'INSERT';
             }
 
-            $meta = $this->_em->getClassMetadata('BackBee\ClassContent\Indexes\IdxSiteContent');
-            $query = $command.' INTO '.$meta->getTableName().
-                    ' ('.$meta->getColumnName('site_uid').', '.$meta->getColumnName('content_uid').')'.
-                    ' VALUES ("'.$site_uid.'", "'.implode('"), ("'.$site_uid.'", "', $content_uids).'")';
+            $meta = $this->_em->getClassMetadata('BackBuilder\ClassContent\Indexes\IdxSiteContent');
+            
+            if (false === $this->multi_values_supported) {
+                foreach($content_uids as $content_uid) {
+                    $query = $command.' INTO '.$meta->getTableName().
+                            ' ('.$meta->getColumnName('site_uid').', '.$meta->getColumnName('content_uid').')'.
+                            ' VALUES ("'.$site_uid.'", "'.$content_uid.'")';
 
-            $this->_em->getConnection()->executeQuery($query);
+                    $this->_em->getConnection()->executeQuery($query);                
+                }
+            } else {
+                $query = $command.' INTO '.$meta->getTableName().
+                        ' ('.$meta->getColumnName('site_uid').', '.$meta->getColumnName('content_uid').')'.
+                        ' VALUES ("'.$site_uid.'", "'.implode('"), ("'.$site_uid.'", "', $content_uids).'")';
+
+                $this->_em->getConnection()->executeQuery($query);
+            }
         }
 
         return $this;
@@ -225,7 +240,7 @@ class IndexationRepository extends EntityRepository
 
         $query  = 'SELECT j.parent_uid FROM content_has_subcontent j
                    LEFT JOIN content c ON c.uid = j.content_uid
-                   WHERE classname != \'BackBee\ClassContent\Element\'';
+                   WHERE classname != \'BackBuilder\ClassContent\Element\'';
 
         $where = array();
         foreach ($uids as $uid) {
@@ -252,7 +267,7 @@ class IndexationRepository extends EntityRepository
      */
     public function getParentContentUids(array $contents)
     {
-        $meta = $this->_em->getClassMetadata('BackBee\ClassContent\Indexes\IdxContentContent');
+        $meta = $this->_em->getClassMetadata('BackBuilder\ClassContent\Indexes\IdxContentContent');
 
         $q = $this->_em->getConnection()
                 ->createQueryBuilder()
@@ -265,7 +280,6 @@ class IndexationRepository extends EntityRepository
                 ->from('content_has_subcontent', 'j');
 
         $index = 0;
-        $method = 'where';
         $atleastone = false;
         foreach ($contents as $content) {
             if (false === ($content instanceof AClassContent)) {
@@ -276,26 +290,17 @@ class IndexationRepository extends EntityRepository
                 continue;
             }
 
-            if ($index !== 0) {
-                $method = 'orWhere';
-            }
+            $q->orWhere('c.'.$meta->getColumnName('subcontent_uid').' = :uid'.$index)
+                    ->setParameter('uid'.$index, $content->getUid());
 
-            $q->{$method}('c.'.$meta->getColumnName('subcontent_uid').' = :uid'.$index)
-              ->setParameter('uid'.$index, $content->getUid());
-
-            $p->{$method}('j.content_uid = :uid'.$index)
-              ->setParameter('uid'.$index, $content->getUid());
+            $p->orWhere('j.content_uid = :uid'.$index)
+                    ->setParameter('uid'.$index, $content->getUid());
 
             $index++;
             $atleastone = true;
         }
 
-        return (true === $atleastone) ? array_unique(
-            array_merge(
-                $q->execute()->fetchAll(\PDO::FETCH_COLUMN),
-                $p->execute()->fetchAll(\PDO::FETCH_COLUMN)
-            )
-        ) : array();
+        return (true === $atleastone) ? array_unique(array_merge($q->execute()->fetchAll(\PDO::FETCH_COLUMN), $p->execute()->fetchAll(\PDO::FETCH_COLUMN))) : array();
     }
 
     /**
@@ -309,7 +314,7 @@ class IndexationRepository extends EntityRepository
             $contents = array($contents);
         }
 
-        $meta = $this->_em->getClassMetadata('BackBee\ClassContent\Indexes\IdxContentContent');
+        $meta = $this->_em->getClassMetadata('BackBuilder\ClassContent\Indexes\IdxContentContent');
 
         $q = $this->_em->getConnection()
                 ->createQueryBuilder()
@@ -344,7 +349,7 @@ class IndexationRepository extends EntityRepository
      */
     public function getNodeUids(array $content_uids)
     {
-        $meta = $this->_em->getClassMetadata('BackBee\ClassContent\AClassContent');
+        $meta = $this->_em->getClassMetadata('BackBuilder\ClassContent\AClassContent');
 
         $q = $this->_em->getConnection()
                 ->createQueryBuilder()
@@ -359,15 +364,15 @@ class IndexationRepository extends EntityRepository
 
     /**
      * Removes a set of Site-Content indexes
-     * @param  string                                                $site_uid
-     * @param  array                                                 $content_uids
-     * @return \BackBee\ClassContent\Repository\IndexationRepository
+     * @param  string                                                    $site_uid
+     * @param  array                                                     $content_uids
+     * @return \BackBuilder\ClassContent\Repository\IndexationRepository
      */
     private function _removeIdxSiteContents($site_uid, array $content_uids)
     {
         if (0 < count($content_uids)) {
             $this->getEntityManager()
-                    ->createQuery('DELETE FROM BackBee\ClassContent\Indexes\IdxSiteContent i
+                    ->createQuery('DELETE FROM BackBuilder\ClassContent\Indexes\IdxSiteContent i
                         WHERE i.site_uid=:site_uid
                         AND i.content_uid IN (:content_uids)')
                     ->setParameters(array(
@@ -381,25 +386,25 @@ class IndexationRepository extends EntityRepository
 
     /**
      * Replaces a set of Site-Content indexes
-     * @param  string                                                $site_uid
-     * @param  array                                                 $content_uids
-     * @return \BackBee\ClassContent\Repository\IndexationRepository
+     * @param  string                                                    $site_uid
+     * @param  array                                                     $content_uids
+     * @return \BackBuilder\ClassContent\Repository\IndexationRepository
      */
     private function _replaceIdxContentContents(array $parent_uids)
     {
         if (0 < count($parent_uids)) {
             $command = 'REPLACE';
-            if (false === $this->_replace_supported) {
+            if (false === $this->replace_supported) {
                 // REPLACE command not supported, remove first then insert
                 $this->_removeIdxContentContents(array_keys($parent_uids));
                 $command = 'INSERT';
             }
 
-            $meta = $this->_em->getClassMetadata('BackBee\ClassContent\Indexes\IdxContentContent');
+            $meta = $this->_em->getClassMetadata('BackBuilder\ClassContent\Indexes\IdxContentContent');
             $insert_children = array();
             foreach ($parent_uids as $parent_uid => $subcontent_uids) {
                 foreach ($subcontent_uids as $subcontent_uid) {
-                    $insert_children[] = sprintf('SELECT "%s", "%s"', $parent_uid, $subcontent_uid);
+                    $insert_children[] = sprintf('SELECT "%s", "%s"',$parent_uid, $subcontent_uid);
                     $insert_children[] = sprintf('SELECT %s, "%s"
                         FROM %s
                         WHERE %s = "%s"', $meta->getColumnName('content_uid'), $subcontent_uid, $meta->getTableName(), $meta->getColumnName('subcontent_uid'), $parent_uid
@@ -420,19 +425,21 @@ class IndexationRepository extends EntityRepository
             }
         }
 
+
+
         return $this;
     }
 
     /**
      * Removes a set of Content-Content indexes
-     * @param  array                                                 $content_uids
-     * @return \BackBee\ClassContent\Repository\IndexationRepository
+     * @param  array                                                     $content_uids
+     * @return \BackBuilder\ClassContent\Repository\IndexationRepository
      */
     public function _removeIdxContentContents(array $content_uids)
     {
         if (0 < count($content_uids)) {
             $this->getEntityManager()
-                    ->createQuery('DELETE FROM BackBee\ClassContent\Indexes\IdxContentContent i
+                    ->createQuery('DELETE FROM BackBuilder\ClassContent\Indexes\IdxContentContent i
                         WHERE i.content_uid IN(:content_uids)
                         OR i.subcontent_uid IN(:subcontent_uids)')
                     ->setParameters(array(
@@ -446,10 +453,10 @@ class IndexationRepository extends EntityRepository
 
     /**
      * Executes an, optionally parameterized, SQL query
-     * @param  string                                                $query  The SQL query to execute
-     * @param  array                                                 $params The parameters to bind to the query, if any
-     * @param  array                                                 $types  The types the previous parameters are in
-     * @return \BackBee\ClassContent\Repository\IndexationRepository
+     * @param  string                                                    $query  The SQL query to execute
+     * @param  array                                                     $params The parameters to bind to the query, if any
+     * @param  array                                                     $types  The types the previous parameters are in
+     * @return \BackBuilder\ClassContent\Repository\IndexationRepository
      */
     private function _executeQuery($query, array $params = array(), array $types = array())
     {
@@ -462,8 +469,8 @@ class IndexationRepository extends EntityRepository
 
     /**
      * Replace site-content indexes for the provided page
-     * @param  \BackBee\NestedNode\Page                              $page
-     * @return \BackBee\ClassContent\Repository\IndexationRepository
+     * @param  \BackBuilder\NestedNode\Page                              $page
+     * @return \BackBuilder\ClassContent\Repository\IndexationRepository
      */
     private function _replaceIdxSite(Page $page)
     {
@@ -481,8 +488,8 @@ class IndexationRepository extends EntityRepository
 
     /**
      * Remove stored content-content indexes from a content
-     * @param  \BackBee\ClassContent\AClassContent                   $content
-     * @return \BackBee\ClassContent\Repository\IndexationRepository
+     * @param  \BackBuilder\ClassContent\AClassContent                   $content
+     * @return \BackBuilder\ClassContent\Repository\IndexationRepository
      */
     private function _removeIdxContentContent(AClassContent $content)
     {
@@ -497,9 +504,9 @@ class IndexationRepository extends EntityRepository
 
     /**
      * Remove stored page-content indexes from a content and a page
-     * @param  \BackBee\ClassContent\AClassContent                   $content
-     * @param  \BackBee\NestedNode\Page                              $page
-     * @return \BackBee\ClassContent\Repository\IndexationRepository
+     * @param  \BackBuilder\ClassContent\AClassContent                   $content
+     * @param  \BackBuilder\NestedNode\Page                              $page
+     * @return \BackBuilder\ClassContent\Repository\IndexationRepository
      */
     private function _removeIdxContentPage(AClassContent $content, Page $page)
     {
@@ -517,8 +524,8 @@ class IndexationRepository extends EntityRepository
 
     /**
      * Remove stored site-content indexes from a site and a page
-     * @param  \BackBee\NestedNode\Page                              $page
-     * @return \BackBee\ClassContent\Repository\IndexationRepository
+     * @param  \BackBuilder\NestedNode\Page                              $page
+     * @return \BackBuilder\ClassContent\Repository\IndexationRepository
      */
     private function _removeIdxSite(Page $page)
     {
@@ -535,8 +542,8 @@ class IndexationRepository extends EntityRepository
     /**
      * Replace content-content indexes for the provided content
      * Also replace page-content indexes if content has a main node
-     * @param  \BackBee\ClassContent\AClassContent                   $content
-     * @return \BackBee\ClassContent\Repository\IndexationRepository
+     * @param  \BackBuilder\ClassContent\AClassContent                   $content
+     * @return \BackBuilder\ClassContent\Repository\IndexationRepository
      */
     public function updateIdxContent(AClassContent $content)
     {
@@ -559,9 +566,9 @@ class IndexationRepository extends EntityRepository
     /**
      * Replace page-content indexes for the provided page
      * Then replace site_content indexes
-     * @param  \BackBee\NestedNode\Page                              $page
-     * @param  \BackBee\ClassContent\AClassContent                   $content
-     * @return \BackBee\ClassContent\Repository\IndexationRepository
+     * @param  \BackBuilder\NestedNode\Page                              $page
+     * @param  \BackBuilder\ClassContent\AClassContent                   $content
+     * @return \BackBuilder\ClassContent\Repository\IndexationRepository
      */
     public function updateIdxPage(Page $page = null, AClassContent $content = null)
     {
@@ -589,9 +596,9 @@ class IndexationRepository extends EntityRepository
 
     /**
      * Replaces site-content indexes for a content in a site
-     * @param  \BackBee\Site\Site                                    $site
-     * @param  \BackBee\ClassContent\AClassContent                   $content
-     * @return \BackBee\ClassContent\Repository\IndexationRepository
+     * @param  \BackBuilder\Site\Site                                    $site
+     * @param  \BackBuilder\ClassContent\AClassContent                   $content
+     * @return \BackBuilder\ClassContent\Repository\IndexationRepository
      */
     public function updateIdxSiteContent(Site $site, AClassContent $content)
     {
@@ -629,8 +636,8 @@ class IndexationRepository extends EntityRepository
 
     /**
      * Removes all stored indexes for the content
-     * @param  \BackBee\ClassContent\AClassContent                   $content
-     * @return \BackBee\ClassContent\Repository\IndexationRepository
+     * @param  \BackBuilder\ClassContent\AClassContent                   $content
+     * @return \BackBuilder\ClassContent\Repository\IndexationRepository
      */
     public function removeIdxContent(AClassContent $content)
     {
@@ -645,8 +652,8 @@ class IndexationRepository extends EntityRepository
 
     /**
      * Remove stored page-content and site-content indexes from a page
-     * @param  \BackBee\NestedNode\Page                              $page
-     * @return \BackBee\ClassContent\Repository\IndexationRepository
+     * @param  \BackBuilder\NestedNode\Page                              $page
+     * @return \BackBuilder\ClassContent\Repository\IndexationRepository
      */
     public function removeIdxPage(Page $page)
     {
@@ -662,9 +669,9 @@ class IndexationRepository extends EntityRepository
 
     /**
      * Removes stored site-content indexes for a content in a site
-     * @param  \BackBee\Site\Site                                    $site
-     * @param  \BackBee\ClassContent\AClassContent                   $content
-     * @return \BackBee\ClassContent\Repository\IndexationRepository
+     * @param  \BackBuilder\Site\Site                                    $site
+     * @param  \BackBuilder\ClassContent\AClassContent                   $content
+     * @return \BackBuilder\ClassContent\Repository\IndexationRepository
      */
     public function removeIdxSiteContent(Site $site, AClassContent $content)
     {

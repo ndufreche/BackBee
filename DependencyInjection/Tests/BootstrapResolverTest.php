@@ -128,7 +128,7 @@ class BootstrapResolverTest extends \PHPUnit_Framework_TestCase
             array(
                 'context'            => 'default',
                 'environment'        => '',
-                'bootstrap_filepath' => $this->resources_base_dir.'/Config/bootstrap.yml',
+                'bootstrap_filepath' => $this->resources_base_dir . implode(DIRECTORY_SEPARATOR, array('', 'Config', 'bootstrap.yml')),
             ),
             $bootstrap_resolver->getBootstrapParameters()
         );
@@ -139,7 +139,7 @@ class BootstrapResolverTest extends \PHPUnit_Framework_TestCase
             array(
                 'context'            => 'api',
                 'environment'        => 'preprod',
-                'bootstrap_filepath' => $this->resources_base_dir.'/api/Config/preprod/bootstrap.yml',
+                'bootstrap_filepath' => $this->resources_base_dir . implode(DIRECTORY_SEPARATOR, array('', 'api', 'Config', 'preprod', 'bootstrap.yml')),
             ),
             $bootstrap_resolver->getBootstrapParameters()
         );
@@ -150,7 +150,7 @@ class BootstrapResolverTest extends \PHPUnit_Framework_TestCase
             array(
                 'context'            => 'api',
                 'environment'        => '',
-                'bootstrap_filepath' => $this->resources_base_dir.'/api/Config/bootstrap.yml',
+                'bootstrap_filepath' => $this->resources_base_dir . implode(DIRECTORY_SEPARATOR, array('', 'api', 'Config', 'bootstrap.yml')),
             ),
             $bootstrap_resolver->getBootstrapParameters()
         );
@@ -161,7 +161,7 @@ class BootstrapResolverTest extends \PHPUnit_Framework_TestCase
             array(
                 'context'            => 'default',
                 'environment'        => 'preprod',
-                'bootstrap_filepath' => $this->resources_base_dir.'/Config/preprod/bootstrap.yml',
+                'bootstrap_filepath' => $this->resources_base_dir . implode(DIRECTORY_SEPARATOR, array('', 'Config', 'preprod', 'bootstrap.yml')),
             ),
             $bootstrap_resolver->getBootstrapParameters()
         );

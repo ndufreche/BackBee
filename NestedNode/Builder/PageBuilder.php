@@ -130,6 +130,18 @@ class PageBuilder
     private $persist;
 
     /**
+     * Is the built page a root?
+     * @var boolean
+     */
+    private $isRoot = false;
+
+    /**
+     * Is the built page a section?
+     * @var boolean
+     */
+    private $isSection = false;
+
+    /**
      * [__construct description]
      */
     public function __construct(EntityManager $em)
@@ -152,10 +164,15 @@ class PageBuilder
         $page = new Page($this->uid);
         $page->setTitle($this->title);
         $page->setSite($this->site);
+        $page->setLayout($this->layout, $this->itemToPushInMainZone);
 
-        if (null !== $this->root) {
-            $page->setRoot($this->root);
+        if (true === $this->isRoot) {
+            $root_section = new Section($page->getUid(), array('page' => $page, 'site' => $page->getSite()));
+            $page->setSection($root_section);
+        } elseif (true === $this->isSection) {
+            $page->setParent($this->parent);
         }
+        $this->doPersistIfValid($page);
 
         if (null !== $this->parent) {
             $page->setParent($this->parent);
@@ -214,8 +231,6 @@ class PageBuilder
             $this->updateContentRevision($column);
         }
 
-        $this->doPersistIfValid($page);
-
         $this->reset();
 
         return $page;
@@ -234,6 +249,8 @@ class PageBuilder
         $this->publishedAt = null;
         $this->state = null;
         $this->persist = null;
+        $this->isRoot = false;
+        $this->isSection = false;
     }
 
     /**
@@ -338,6 +355,32 @@ class PageBuilder
     public function getRoot()
     {
         return $this->root;
+    }
+
+    /**
+     * Is the built page a root?
+     * @param boolean $isRoot
+     * @return \BackBuilder\NestedNode\Builder\PageBuilder
+     */
+    public function isRoot($isRoot = true)
+    {
+        $this->isRoot = (true === $isRoot);
+        if (true === $this->isRoot) {
+            $this->isSection(true);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Is the built page a section?
+     * @param boolean $isSection
+     * @return \BackBuilder\NestedNode\Builder\PageBuilder
+     */
+    public function isSection($isSection = true)
+    {
+        $this->isSection = (true == $isSection);
+        return $this;
     }
 
     /**
@@ -669,7 +712,7 @@ class PageBuilder
         }
 
         if (false === empty($method)) {
-            $this->em->getRepository('BackBee\NestedNode\Page')->$method($page, $page->getParent());
+            $this->em->getRepository('BackBuilder\NestedNode\Page')->$method($page, $page->getParent(), $this->isSection);
         }
     }
 }
