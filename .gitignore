@@ -7,3 +7,4 @@ TestUnit/
 /composer.lock
 /phpunit.phar
 /build
+/Resources/toolbar
