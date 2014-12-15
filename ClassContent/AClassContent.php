@@ -77,7 +77,7 @@ abstract class AClassContent extends AContent
      * @var int
      */
     const STATE_LOCKED = 1002;
-    
+
     /**
      * The many to many association between this content and its subcontent
      * @var \Doctrine\Common\Collections\ArrayCollection
@@ -850,7 +850,7 @@ abstract class AClassContent extends AContent
      */
     public function getImageName()
     {
-        return str_replace(array(self::CLASSCONTENT_BASE_NAMESPACE, '\\'), array('', '/'), get_class($this)) . '.png';
+        return str_replace(array(self::CLASSCONTENT_BASE_NAMESPACE, '\\'), array('', '/'), get_class($this)).'.png';
     }
 
     /*     * **************************************************************** */
@@ -1074,7 +1074,7 @@ abstract class AClassContent extends AContent
             'properties' => $this->getProperty(),
             'main_node'  => null === $this->getMainNode() ? null : $this->getMainNode()->getUid(),
             'draft_uid'  => null !== $this->getDraft() ? $this->getDraft()->getUid() : null,
-            'image'      => $this->getImageName()
+            'image'      => $this->getImageName(),
         );
 
         $datas = array_merge(parent::jsonSerialize(), $datas);
