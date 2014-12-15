@@ -77,7 +77,7 @@ abstract class AClassContent extends AContent
      * @var int
      */
     const STATE_LOCKED = 1002;
-
+    
     /**
      * The many to many association between this content and its subcontent
      * @var \Doctrine\Common\Collections\ArrayCollection

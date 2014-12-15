@@ -122,27 +122,38 @@ class ClassContentRepository extends EntityRepository
      */
     public function getSelection($selector, $multipage = false, $recursive = true, $start = 0, $limit = null, $limitToOnline = true, $excludedFromSelection = false, $classnameArr = array(), $delta = 0)
     {
+        $qb = new ClassContentQueryBuilder($this->_em);
+
+        $qb = $qb->select('cc._uid');
+
         $query = 'SELECT c.uid FROM content c';
+
         $join = array();
         $where = array();
         $orderby = array();
         $limit = $limit ? $limit : (array_key_exists('limit', $selector) ? $selector['limit'] : 10);
         $offset = $start + $delta;
 
+
+
+
         if (true === is_array($classnameArr) && 0 < count($classnameArr)) {
-            foreach ($classnameArr as $classname) {
-                // ensure Doctrine already known these classname
-                class_exists($classname);
-            }
+            
+            $qb->addClassFilter($classnameArr);
             $where[] = str_replace('\\', '\\\\', 'c.classname IN ("'.implode('","', $classnameArr).'")');
         }
+
+
 
         if (true === array_key_exists('content_uid', $selector)) {
             $uids = (array) $selector['content_uid'];
             if (false === empty($uids)) {
+                $qb->addWhere('cc._uid', $qb->expr()->in($uids));
                 $where[] = 'c.uid IN ("'.implode('","', $uids).'")';
             }
         }
+
+
 
         if (true === array_key_exists('criteria', $selector)) {
             $criteria = (array) $selector['criteria'];
@@ -158,6 +169,8 @@ class ClassContentRepository extends EntityRepository
             }
         }
 
+
+
         if (true === array_key_exists('indexedcriteria', $selector) &&
                 true === is_array($selector['indexedcriteria'])) {
             foreach ($selector['indexedcriteria'] as $field => $values) {
@@ -169,6 +182,8 @@ class ClassContentRepository extends EntityRepository
                 }
             }
         }
+
+
 
         if (true === array_key_exists("keywordsselector", $selector)) {
             $keywordInfos = $selector["keywordsselector"];
@@ -190,11 +205,15 @@ class ClassContentRepository extends EntityRepository
             }
         }
 
+
+
         if (false === array_key_exists('orderby', $selector)) {
             $selector['orderby'] = array('created', 'desc');
         } else {
             $selector['orderby'] = (array) $selector['orderby'];
         }
+
+
 
         $has_page_joined = false;
         if (array_key_exists('parentnode', $selector) && true === is_array($selector['parentnode'])) {
@@ -238,6 +257,8 @@ class ClassContentRepository extends EntityRepository
             }
         }
 
+
+
         if (0 === count($orderby)) {
             if (true === property_exists('BackBee\ClassContent\AClassContent', '_'.$selector['orderby'][0])) {
                 $orderby[] = 'c.'.$selector['orderby'][0].' '.(count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
@@ -248,9 +269,13 @@ class ClassContentRepository extends EntityRepository
             }
         }
 
+
+
         if (0 < count($join)) {
             $query .= ' '.implode(' ', $join);
         }
+
+
 
         if (0 < count($where)) {
             $query .= sprintf(' WHERE %s', implode(' AND ', $where));
@@ -261,6 +286,8 @@ class ClassContentRepository extends EntityRepository
             $query = str_replace('SELECT c.uid', 'SELECT SQL_CALC_FOUND_ROWS c.uid', $query);
             $query = str_replace('USE INDEX(IDX_SELECT_PAGE)', ' ', $query);
         }
+
+
 
         $uids = $this->getEntityManager()
                 ->getConnection()
@@ -307,6 +334,7 @@ class ClassContentRepository extends EntityRepository
             return $paginator;
         }
 
+        var_dump($q->getQuery()->getSQL());die;
         $result = $q->getQuery()->getResult();
 
         return $result;

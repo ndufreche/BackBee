@@ -182,7 +182,7 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals('A date', $this->content->date->value);
     }
-
+    
     /**
      * test prepareCommitDraft
      *
