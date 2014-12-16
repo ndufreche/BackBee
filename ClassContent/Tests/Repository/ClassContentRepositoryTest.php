@@ -85,7 +85,7 @@ class ClassContentRepositoryTest extends TestCase
         $this->em->persist($contentSet);
         $this->em->flush();
 
-        var_dump(\Doctrine\Common\Util\Debug::dump($this->em->getRepository('BackBuilder\ClassContent\AClassContent')->findAll()));
+        // var_dump(\Doctrine\Common\Util\Debug::dump($this->em->getRepository('BackBuilder\ClassContent\AClassContent')->findAll())); return 4 contentSets
     }
 
     public function testGetSelection()
@@ -99,7 +99,7 @@ class ClassContentRepositoryTest extends TestCase
         );
 
         $queryResult = $this->repository->getSelection($selector, false, false, 0, null, false, false, array('BackBuilder\ClassContent\Tests\Mock\MockContent'));
-        var_dump($queryResult);die;
+        // var_dump($queryResult); return array()
         $this->assertInternalType('array', $queryResult);
     }
 
