@@ -122,9 +122,9 @@ class ClassContentRepository extends EntityRepository
      */
     public function getSelection($selector, $multipage = false, $recursive = true, $start = 0, $limit = null, $limitToOnline = true, $excludedFromSelection = false, $classnameArr = array(), $delta = 0)
     {
-        $qb = new ClassContentQueryBuilder($this->_em);
-
-        $qb = $qb->select('cc._uid');
+        $qb = $this->getQueryBuilder()
+            ->select('cc._uid')
+        ;
 
         $query = 'SELECT c.uid FROM content c';
 
@@ -135,10 +135,7 @@ class ClassContentRepository extends EntityRepository
         $offset = $start + $delta;
 
 
-
-
         if (true === is_array($classnameArr) && 0 < count($classnameArr)) {
-            
             $qb->addClassFilter($classnameArr);
             $where[] = str_replace('\\', '\\\\', 'c.classname IN ("'.implode('","', $classnameArr).'")');
         }
@@ -148,12 +145,10 @@ class ClassContentRepository extends EntityRepository
         if (true === array_key_exists('content_uid', $selector)) {
             $uids = (array) $selector['content_uid'];
             if (false === empty($uids)) {
-                $qb->addWhere('cc._uid', $qb->expr()->in($uids));
+                $qb->addUidsFilter($uids);
                 $where[] = 'c.uid IN ("'.implode('","', $uids).'")';
             }
         }
-
-
 
         if (true === array_key_exists('criteria', $selector)) {
             $criteria = (array) $selector['criteria'];
@@ -965,5 +960,16 @@ class ClassContentRepository extends EntityRepository
             ->executeQuery($sql, array('content_uids' => implode(', ', $content_uids)))
             ->fetchAll(\PDO::FETCH_COLUMN)
         ;
+    }
+
+    /**
+     * Creates a new ClassContent QueryBuilder instance that is prepopulated for this entity name.
+     * @param  string                                                    $alias
+     * @param  string                                                    $indexBy The index for the from.
+     * @return \BackBuilder\ClassContent\Repository\ClassContentQueryBuilder
+     */
+    public function getQueryBuilder()
+    {
+        return new ClassContentQueryBuilder($this->_em);
     }
 }

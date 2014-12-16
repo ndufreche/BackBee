@@ -74,16 +74,32 @@ class ClassContentRepositoryTest extends TestCase
 
         $this->em->persist($this->pageRoot);
         $this->em->flush();
+
+        // add contents to the page
+        $contentSet = $this->pageRoot->getContentSet();
+        $content = new MockContent();
+        $content->load();
+        $content->setMainNode($this->pageRoot);
+        $contentSet->push($content);
+
+        $this->em->persist($contentSet);
+        $this->em->flush();
+
+        var_dump(\Doctrine\Common\Util\Debug::dump($this->em->getRepository('BackBuilder\ClassContent\AClassContent')->findAll()));
     }
 
     public function testGetSelection()
     {
         $selector = array(
-                        'parentnode' => $this->pageRoot,
-                        'orderby' => array('modified', 'desc'),
-                        'limit' => 6
-                    );
-        $queryResult = $this->repository->getSelection($selector, false, false, 0, null, false, false, array('BackBuilder\ClassContent\ContentSet'));
+            'content_uid' => array(1,2),
+            'criteria' => array('query' => 'LIKE'),
+            'parentnode' => $this->pageRoot,
+            'orderby' => array('modified', 'desc'),
+            'limit' => 6
+        );
+
+        $queryResult = $this->repository->getSelection($selector, false, false, 0, null, false, false, array('BackBuilder\ClassContent\Tests\Mock\MockContent'));
+        var_dump($queryResult);die;
         $this->assertInternalType('array', $queryResult);
     }
 

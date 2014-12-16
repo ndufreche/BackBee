@@ -33,6 +33,10 @@ use BackBee\ClassContent\Element\text;
  * @Table(name="content")
  * @category    BackBee
  * @package     BackBee\ClassContent\Tests\Mock
+ * @HasLifecycleCallbacks
+ *
+ * @property \BackBee\ClassContent\Element\text $title Title
+ * @property \BackBee\ClassContent\ContentSet $body Body
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
