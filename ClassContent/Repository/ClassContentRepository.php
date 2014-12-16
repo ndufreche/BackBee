@@ -334,7 +334,7 @@ class ClassContentRepository extends EntityRepository
             return $paginator;
         }
 
-        var_dump($q->getQuery()->getSQL());die;
+        var_dump($q->getQuery()->getSQL());
         $result = $q->getQuery()->getResult();
 
         return $result;

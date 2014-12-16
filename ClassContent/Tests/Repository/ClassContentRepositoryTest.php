@@ -74,20 +74,17 @@ class ClassContentRepositoryTest extends TestCase
 
         $this->em->persist($this->pageRoot);
         $this->em->flush();
-
-        //var_dump(\Doctrine\Common\Util\Debug::dump($this->em->getRepository('BackBuilder\ClassContent\AClassContent')->findAll()));
     }
 
     public function testGetSelection()
     {
         $selector = array(
-                        //'parentnode' => null,
+                        'parentnode' => $this->pageRoot,
                         'orderby' => array('modified', 'desc'),
                         'limit' => 6
                     );
         $queryResult = $this->repository->getSelection($selector, false, false, 0, null, false, false, array('BackBuilder\ClassContent\ContentSet'));
-        	var_dump($queryResult);
-        $this->assertInstanceOf('BackBuilder\Util\Doctrine\SettablePaginator', $queryResult);
+        $this->assertInternalType('array', $queryResult);
     }
 
     /**
