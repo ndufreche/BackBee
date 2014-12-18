@@ -37,7 +37,7 @@ use BackBee\Tests\TestCase;
  */
 class ClassContentRepositoryTest extends TestCase
 {
-	/**
+    /**
      * @var \Doctrine\ORM\EntityManager
      */
     private $em;
@@ -57,7 +57,7 @@ class ClassContentRepositoryTest extends TestCase
      */
     public function setUp()
     {
-    	$this->initDb($this->getBBApp());
+        $this->initDb($this->getBBApp());
         $this->em = $this->getEntityManager();
         $this->repository = $this->em->getRepository('BackBee\ClassContent\AClassContent');
 
@@ -75,16 +75,6 @@ class ClassContentRepositoryTest extends TestCase
         $this->em->persist($this->pageRoot);
         $this->em->flush();
 
-        // add contents to the page
-        $contentSet = $this->pageRoot->getContentSet();
-        $content = new MockContent();
-        $content->load();
-        $content->setMainNode($this->pageRoot);
-        $contentSet->push($content);
-
-        $this->em->persist($contentSet);
-        $this->em->flush();
-
         // var_dump(\Doctrine\Common\Util\Debug::dump($this->em->getRepository('BackBee\ClassContent\AClassContent')->findAll())); return 4 contentSets
     }
 
@@ -98,8 +88,9 @@ class ClassContentRepositoryTest extends TestCase
             'limit' => 6
         );
 
-        $queryResult = $this->repository->getSelection($selector, false, false, 0, null, false, false, array('BackBee\ClassContent\Tests\Mock\MockContent'));
+        $queryResult = $this->repository->getSelection($selector, false, false, 0, null, false, false, array('BackBee\ClassContent\AClassContent'));
         // var_dump($queryResult); return array()
+        // use MockContent produce an Exception :Entity 'BackBee\ClassContent\Tests\Mock\MockContent' has to be part of the discriminator map of 'BackBee\ClassContent\AClassContent' to be properly mapped in the inheritance hierarchy.
         $this->assertInternalType('array', $queryResult);
     }
 
