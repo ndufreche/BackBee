@@ -3,35 +3,35 @@
 /*
  * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee5.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BackBuilder\ClassContent\Tests\Repository;
+namespace BackBee\ClassContent\Tests\Repository;
 
-use BackBuilder\Site\Site;
-use BackBuilder\Site\Layout;
-use BackBuilder\NestedNode\Page;
-use BackBuilder\ClassContent\Repository\ClassContentRepository;
-use BackBuilder\ClassContent\Tests\Mock\MockContent;
-use BackBuilder\Tests\TestCase;
+use BackBee\Site\Site;
+use BackBee\Site\Layout;
+use BackBee\NestedNode\Page;
+use BackBee\ClassContent\Repository\ClassContentRepository;
+use BackBee\ClassContent\Tests\Mock\MockContent;
+use BackBee\Tests\TestCase;
 
 
 /**
- * @category    BackBuilder
- * @package     BackBuilder\NestedNode\Tests
+ * @category    BackBee
+ * @package     BackBee\NestedNode\Tests
  * @copyright   Lp digital system
  * @author      Mickaël Andrieu <mickael.andrieu@lp-digital.fr>
  */
@@ -43,12 +43,12 @@ class ClassContentRepositoryTest extends TestCase
     private $em;
 
     /**
-     * @var \BackBuilder\ClassContent\Repository\ClassContentRepository
+     * @var \BackBee\ClassContent\Repository\ClassContentRepository
      */
     private $repository;
 
     /**
-     * @var \BackBuilder\NestedNode\Page
+     * @var \BackBee\NestedNode\Page
      */
     private $pageRoot;
 
@@ -59,7 +59,7 @@ class ClassContentRepositoryTest extends TestCase
     {
     	$this->initDb($this->getBBApp());
         $this->em = $this->getEntityManager();
-        $this->repository = $this->em->getRepository('BackBuilder\ClassContent\AClassContent');
+        $this->repository = $this->em->getRepository('BackBee\ClassContent\AClassContent');
 
         $site = new Site('site-test', array('label' => 'site-test'));
         $this->em->persist($site);
@@ -85,7 +85,7 @@ class ClassContentRepositoryTest extends TestCase
         $this->em->persist($contentSet);
         $this->em->flush();
 
-        // var_dump(\Doctrine\Common\Util\Debug::dump($this->em->getRepository('BackBuilder\ClassContent\AClassContent')->findAll())); return 4 contentSets
+        // var_dump(\Doctrine\Common\Util\Debug::dump($this->em->getRepository('BackBee\ClassContent\AClassContent')->findAll())); return 4 contentSets
     }
 
     public function testGetSelection()
@@ -98,7 +98,7 @@ class ClassContentRepositoryTest extends TestCase
             'limit' => 6
         );
 
-        $queryResult = $this->repository->getSelection($selector, false, false, 0, null, false, false, array('BackBuilder\ClassContent\Tests\Mock\MockContent'));
+        $queryResult = $this->repository->getSelection($selector, false, false, 0, null, false, false, array('BackBee\ClassContent\Tests\Mock\MockContent'));
         // var_dump($queryResult); return array()
         $this->assertInternalType('array', $queryResult);
     }
