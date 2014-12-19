@@ -21,6 +21,14 @@
 
 namespace BackBee\ClassContent;
 
+use Doctrine\ORM\Mapping as ORM;
+use ORM\Table as Table;
+use ORM\Entity as Entity;
+use ORM\Column as Column;
+use ORM\Id as Id;
+use ORM\ManyToOne as ManyToOne;
+use ORM\JoinColumn as JoinColumn;
+
 /**
  * Indexation entry for content
  *

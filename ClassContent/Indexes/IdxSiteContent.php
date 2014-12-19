@@ -21,6 +21,13 @@
 
 namespace BackBee\ClassContent\Indexes;
 
+use Doctrine\ORM\Mapping as ORM;
+use ORM\Table as Table;
+use ORM\Entity as Entity;
+use ORM\Column as Column;
+use ORM\Id as Id;
+
+
 /**
  * Entity class for Site-Content join table
  *

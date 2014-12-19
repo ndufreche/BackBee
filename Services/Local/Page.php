@@ -25,6 +25,7 @@ use BackBee\BBApplication;
 use BackBee\Exception\InvalidArgumentException;
 use BackBee\MetaData\MetaDataBag;
 use BackBee\NestedNode\Page as NestedPage;
+use BackBee\Services\Exception\ServicesException;
 use BackBee\Site\Layout as SiteLayout;
 
 /**

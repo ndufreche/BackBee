@@ -610,7 +610,6 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
                 array_unshift($this->_classcontentdir, $this->getRepository().'/ClassContent');
             }
 
-            //array_walk($this->_classcontentdir, array('BackBee\Util\File', 'resolveFilepath'));
             array_map(array('BackBee\Util\File', 'resolveFilepath'), $this->_classcontentdir);
         }
 
@@ -680,7 +679,6 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
                 }
             }
 
-            //array_walk($this->_resourcedir, array('BackBee\Util\File', 'resolveFilepath'));
             array_map(array('BackBee\Util\File', 'resolveFilepath'), $this->_resourcedir);
         }
 
@@ -765,6 +763,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
     /**
      * @return \Symfony\Component\HttpFoundation\Request
      * @throws BBException
+     * Should use request_stack service when Symfony deps to be updated to > 2.4
      */
     public function getRequest()
     {
@@ -1077,8 +1076,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
             'Symfony\Component\Validator\Constraint' => $this->getVendorDir().'/symfony/symfony/src/',
             'JMS\Serializer\Annotation' => $this->getVendorDir().'/jms/serializer/src/',
             'BackBee\Installer\Annotation' => $this->getBaseDir(),
-            'BackBee' => $this->getBaseDir(),
-            //'Doctrine\ORM\Mapping' => $this->getVendorDir() . '/doctrine/orm/lib/'
+            'BackBee' => $this->getBaseDir()
         ));
 
         // AnnotationReader ignores all annotations handled by SimpleAnnotationReader

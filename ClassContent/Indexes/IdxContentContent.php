@@ -21,6 +21,12 @@
 
 namespace BackBee\ClassContent\Indexes;
 
+use Doctrine\ORM\Mapping as ORM;
+use ORM\Table as Table;
+use ORM\Entity as Entity;
+use ORM\Column as Column;
+use ORM\Id as Id;
+
 /**
  * Entity class for Content-Content join table
  *
@@ -36,13 +42,15 @@ class IdxContentContent
 {
     /**
      * @var string
-     * @Id @Column(type="string", length=32)
+     * @Id
+     * @Column(type="string", length=32)
      */
     private $content_uid;
 
     /**
      * @var string
-     * @Id @Column(type="string", length=32)
+     * @Id
+     * @Column(type="string", length=32)
      */
     private $subcontent_uid;
 }

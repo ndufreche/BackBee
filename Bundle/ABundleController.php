@@ -30,6 +30,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
+use BackBee\Routing\Matcher\UrlMatcher;
 
 /**
  * Abstract class for bundle controller in BackBee5 application

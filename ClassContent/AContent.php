@@ -27,6 +27,11 @@ use BackBee\Security\Acl\Domain\IObjectIdentifiable;
 use BackBee\Util\Parameter;
 use Symfony\Component\Security\Core\Util\ClassUtils;
 
+use Doctrine\ORM\Mapping as ORM;
+use ORM\MappedSuperclass as MappedSuperclass;
+use ORM\Column as Column;
+use ORM\Id as Id;
+
 /**
  * Abstract class for every content and its revisions in BackBee
  *
@@ -46,7 +51,8 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     /**
      * Unique identifier
      * @var string
-     * @Id @Column(type="string", name="uid")
+     * @Id
+     * @Column(type="string", name="uid")
      */
     protected $_uid;
 

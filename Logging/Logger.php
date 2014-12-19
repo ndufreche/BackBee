@@ -119,9 +119,9 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
             }
         }
 
-        $this->_setErrorHandler()
+        /*$this->_setErrorHandler()
              ->_setExceptionHandler()
-        ;
+        ;*/
     }
 
     public function __destruct()

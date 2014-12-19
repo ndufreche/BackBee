@@ -20,12 +20,14 @@
  */
 
 namespace BackBee\Bundle;
+use Doctrine\ORM\Mapping as ORM;
+use ORM\Table as Table;
+use ORM\Entity as Entity;
+use ORM\Column as Column;
+use ORM\Id as Id;
+use ORM\GeneratedValue as GeneratedValue;
 
 /**
- * @category    BackBee
- * @package     BackBee\Bundle
- * @copyright   Lp digital system
- * @author e.chau <eric.chau@lp-digital.fr>
  *
  * @Table(name="registry", indexes={@index(name="IDX_KEY_SCOPE", columns={"`key`", "`scope`"})})
  * @Entity(repositoryClass="BackBee\Bundle\Registry\Repository")

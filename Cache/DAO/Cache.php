@@ -45,7 +45,7 @@ class Cache extends AExtendedCache
      * The cache entity class name
      * @var string
      */
-    const ENTITY_CLASSNAME = 'BackBee\Cache\DAO\Entity';
+    const ENTITY_CLASSNAME = 'BackBee\Cache\DAO\CacheEntity';
 
     /**
      * The Doctrine entity manager to use

@@ -24,6 +24,17 @@ namespace BackBee\ClassContent;
 use BackBee\NestedNode\Page;
 use BackBee\ClassContent\Exception\UnknownPropertyException;
 
+use Doctrine\Common\Util\ClassUtils;
+use Doctrine\ORM\Mapping as ORM;
+
+use ORM\Table as Table;
+use ORM\Entity as Entity;
+use ORM\Column as Column;
+use ORM\Id as Id;
+use ORM\HasLifecycleCallbacks as HasLifecycleCallbacks;
+use ORM\OneToMany as OneToMany;
+
+
 /**
  * A set of content objects in BackBee
  * Implements Iterator, Countable

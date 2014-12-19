@@ -21,6 +21,12 @@
 
 namespace BackBee\Cache\DAO;
 
+use Doctrine\ORM\Mapping as ORM;
+use ORM\Table as Table;
+use ORM\Entity as DoctrineEntity;
+use ORM\Column as Column;
+use ORM\Id as Id;
+
 /**
  * Entity for DAO stored cache data
  *
@@ -32,12 +38,13 @@ namespace BackBee\Cache\DAO;
  * @Entity
  * @Table(name="cache",indexes={@index(name="IDX_EXPIRE", columns={"expire"}), @index(name="IDX_TAG", columns={"tag"})})
  */
-class Entity
+class CacheEntity
 {
     /**
      * The cache id
      * @var string
-     * @Id @Column(type="string", name="uid")
+     * @Id
+     * @Column(type="string", name="uid")
      */
     protected $_uid;
 

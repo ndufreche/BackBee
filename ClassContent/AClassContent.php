@@ -26,6 +26,22 @@ use BackBee\NestedNode\Page;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Security\Core\Util\ClassUtils;
 
+use Doctrine\ORM\Mapping as ORM;
+use ORM\Table as Table;
+use ORM\Entity as Entity;
+use ORM\Column as Column;
+use ORM\Id as Id;
+use ORM\HasLifecycleCallbacks as HasLifecycleCallbacks;
+use ORM\InheritanceType as InheritanceType;
+use ORM\DiscriminatorColumn as DiscriminatorColumn;
+use ORM\DiscriminatorMap as DiscriminatorMap;
+use ORM\OneToMany as OneToMany;
+use ORM\ManyToOne as ManyToOne;
+use ORM\ManyToMany as ManyToMany;
+use ORM\JoinColumn as JoinColumn;
+use ORM\JoinTable as JoinTable;
+use ORM\OrderBy as OrderBy;
+
 /**
  * Abstract class for content object in BackBee
  *
