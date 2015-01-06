@@ -1,47 +1,49 @@
 <?php
 
 /*
- * Copyright (c) 2011-2013 Lp digital system
+ * Copyright (c) 2011-2015 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
  */
 
-namespace BackBuilder\NestedNode\Repository;
+namespace BackBee\NestedNode\Repository;
 
-use BackBuilder\Site\Site;
-use BackBuilder\Util\Arrays;
-use BackBuilder\Util\Buffer;
 use Doctrine\ORM\NoResultException;
+
+use BackBee\Site\Site;
+use BackBee\Util\Arrays;
+use BackBee\Util\Buffer;
 
 /**
  * Section repository
  *
- * @category    BackBuilder
- * @package     BackBuilder/NestedNode
+ * @category    BackBee
+ * @package     BackBee/NestedNode
  * @subpackage  Repository
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class SectionRepository extends NestedNodeRepository
 {
-
     /**
      * Returns the root section for $site tree
-     * @param \BackBuilder\Site\Site $site   the site to test
-     * @return \BackBuilder\NestedNode\Page|NULL
+     * @param  \BackBee\Site\Site            $site the site to test
+     * @return \BackBee\NestedNode\Page|NULL
      */
     public function getRoot(Site $site)
     {
@@ -51,13 +53,14 @@ class SectionRepository extends NestedNodeRepository
                     ->andWhere('s._parent is null')
                     ->setMaxResults(1)
                     ->setParameters(array(
-                'site' => $site
+                'site' => $site,
             ));
+
             return $q->getQuery()->getSingleResult();
         } catch (NoResultException $e) {
-            return null;
+            return;
         } catch (\Exception $e) {
-            return null;
+            return;
         }
     }
 
@@ -71,12 +74,14 @@ class SectionRepository extends NestedNodeRepository
         $node_uid = (array) $node_uid;
         if (0 === count($node_uid)) {
             Buffer::dump("\n##### Nothing to update. ###\n");
+
             return;
         }
 
-        $convert_memory = function($size) {
+        $convert_memory = function ($size) {
             $unit = array('B', 'KB', 'MB', 'GB');
-            return @round($size / pow(1024, ($i = floor(log($size, 1024)))), 2) . ' ' . $unit[$i];
+
+            return @round($size / pow(1024, ($i = floor(log($size, 1024)))), 2).' '.$unit[$i];
         };
 
         $starttime = microtime(true);
@@ -93,19 +98,19 @@ class SectionRepository extends NestedNodeRepository
 
             Buffer::dump(
                     "\n   [END] update tree of $uid in "
-                    . (microtime(true) - $starttime) . 's (memory status: ' . $convert_memory(memory_get_usage()) . ')'
-                    . "\n"
+                    .(microtime(true) - $starttime).'s (memory status: '.$convert_memory(memory_get_usage()).')'
+                    ."\n"
             );
         }
 
-        Buffer::dump("\n##### Update tree (natively) in " . (microtime(true) - $starttime) . "s #####\n\n");
+        Buffer::dump("\n##### Update tree (natively) in ".(microtime(true) - $starttime)."s #####\n\n");
     }
 
     /**
      * Updates nodes information of a tree
-     * @param string $node_uid  The starting point in the tree
-     * @param int $leftnode     Optional, the first value of left node
-     * @param int $level        Optional, the first value of level
+     * @param  string    $node_uid The starting point in the tree
+     * @param  int       $leftnode Optional, the first value of left node
+     * @param  int       $level    Optional, the first value of level
      * @return \StdClass
      */
     public function updateTreeNatively($node_uid, $leftnode = 1, $level = 0)
@@ -130,7 +135,7 @@ class SectionRepository extends NestedNodeRepository
 
     /**
      * Returns an array of uid of the children of $node_uid
-     * @param string $node_uid  The node uid to look for children
+     * @param  string $node_uid The node uid to look for children
      * @return array
      */
     public function getNativelyNodeChildren($node_uid)
@@ -153,11 +158,11 @@ class SectionRepository extends NestedNodeRepository
 
     /**
      * Updates nodes information for Section $section_uid
-     * @param string $section_uid
-     * @param int $leftnode
-     * @param int $rightnode
-     * @param int $level
-     * @return \BackBuilder\NestedNode\Repository\SectionRepository
+     * @param  string                                           $section_uid
+     * @param  int                                              $leftnode
+     * @param  int                                              $rightnode
+     * @param  int                                              $level
+     * @return \BackBee\NestedNode\Repository\SectionRepository
      * @codeCoverageIgnore
      */
     private function updateSectionNodes($section_uid, $leftnode, $rightnode, $level)
@@ -177,15 +182,15 @@ class SectionRepository extends NestedNodeRepository
 
     /**
      * Updates level of page attach to section $section_uid
-     * @param string $section_uid
-     * @param int $level
-     * @return \BackBuilder\NestedNode\Repository\SectionRepository
+     * @param  string                                           $section_uid
+     * @param  int                                              $level
+     * @return \BackBee\NestedNode\Repository\SectionRepository
      * @codeCoverageIgnore
      */
     private function updatePageLevel($section_uid, $level)
     {
         $page_repo = $this->getEntityManager()
-                ->getRepository('BackBuilder\NestedNode\Page');
+                ->getRepository('BackBee\NestedNode\Page');
 
         $page_repo->createQueryBuilder('p')
                 ->update()
@@ -206,5 +211,4 @@ class SectionRepository extends NestedNodeRepository
 
         return $this;
     }
-
 }

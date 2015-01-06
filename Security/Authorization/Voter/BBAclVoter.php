@@ -114,7 +114,7 @@ class BBAclVoter extends AclVoter
     /**
      * Returns the vote for page object, recursively till root
      * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
-     * @param  \BackBuilder\NestedNode\Page                                         $page
+     * @param  \BackBee\NestedNode\Page                                             $page
      * @param  array                                                                $attributes
      * @return integer                                                              either ACCESS_GRANTED, ACCESS_ABSTAIN, or ACCESS_DENIED
      */

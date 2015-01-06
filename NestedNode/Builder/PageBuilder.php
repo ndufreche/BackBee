@@ -27,6 +27,7 @@ use Doctrine\ORM\EntityManager;
 
 use BackBee\ClassContent\AClassContent;
 use BackBee\NestedNode\Page;
+use BackBee\NestedNode\Section;
 use BackBee\Site\Layout;
 use BackBee\Site\Site;
 
@@ -359,8 +360,8 @@ class PageBuilder
 
     /**
      * Is the built page a root?
-     * @param boolean $isRoot
-     * @return \BackBuilder\NestedNode\Builder\PageBuilder
+     * @param  boolean                                 $isRoot
+     * @return \BackBee\NestedNode\Builder\PageBuilder
      */
     public function isRoot($isRoot = true)
     {
@@ -374,12 +375,13 @@ class PageBuilder
 
     /**
      * Is the built page a section?
-     * @param boolean $isSection
-     * @return \BackBuilder\NestedNode\Builder\PageBuilder
+     * @param  boolean                                 $isSection
+     * @return \BackBee\NestedNode\Builder\PageBuilder
      */
     public function isSection($isSection = true)
     {
         $this->isSection = (true == $isSection);
+
         return $this;
     }
 
@@ -712,7 +714,7 @@ class PageBuilder
         }
 
         if (false === empty($method)) {
-            $this->em->getRepository('BackBuilder\NestedNode\Page')->$method($page, $page->getParent(), $this->isSection);
+            $this->em->getRepository('BackBee\NestedNode\Page')->$method($page, $page->getParent(), $this->isSection);
         }
     }
 }

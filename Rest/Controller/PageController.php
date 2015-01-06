@@ -241,7 +241,6 @@ class PageController extends ARestController
             $this->getEntityManager()->persist($page);
 
             $this->getEntityManager()->flush($page);
-
         } catch (\Exception $e) {
             return $this->createResponse('Internal server error: '.$e->getMessage(), 500);
         }
@@ -508,7 +507,7 @@ class PageController extends ARestController
         if (null !== $request->query->get('order_by', null)) {
             foreach ($request->query->get('order_by') as $key => $value) {
                 if ('_' !== $key[0]) {
-                    $key = '_' . $key;
+                    $key = '_'.$key;
                 }
 
                 $order_by[$key] = $value;
@@ -552,7 +551,7 @@ class PageController extends ARestController
         $result_count = $start + $count - 1; // minus 1 cause $start start at 0 and not 1
         $response = $this->createResponse($this->formatCollection($results));
         if (0 < $count) {
-            $response->headers->set('Content-Range', "$start-$result_count/" . count($results));
+            $response->headers->set('Content-Range', "$start-$result_count/".count($results));
         }
 
         return $response;

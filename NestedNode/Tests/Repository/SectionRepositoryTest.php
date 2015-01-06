@@ -1,58 +1,60 @@
 <?php
 
 /*
- * Copyright (c) 2011-2013 Lp digital system
+ * Copyright (c) 2011-2015 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
  */
 
-namespace BackBuilder\NestedNode\Tests\Repository;
+namespace BackBee\NestedNode\Tests\Repository;
 
-use BackBuilder\Tests\TestCase;
-use BackBuilder\NestedNode\Section;
-use BackBuilder\NestedNode\Page;
-use BackBuilder\Site\Site;
 use Doctrine\ORM\Tools\SchemaTool;
 
+use BackBee\NestedNode\Page;
+use BackBee\NestedNode\Section;
+use BackBee\Site\Site;
+use BackBee\Tests\TestCase;
+
 /**
- * @category    BackBuilder
- * @package     BackBuilder\NestedNode\Tests\Repository
+ * @category    BackBee
+ * @package     BackBee\NestedNode\Tests\Repository
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class SectionRepositoryTest extends TestCase
 {
-
     /**
-     * @var \BackBuilder\BBApplication
+     * @var \BackBee\BBApplication
      */
     private $application;
 
     /**
-     * @var \BackBuilder\NestedNode\Section
+     * @var \BackBee\NestedNode\Section
      */
     private $root;
 
     /**
-     * @var \BackBuilder\NestedNode\Repository\SectionRepository
+     * @var \BackBee\NestedNode\Repository\SectionRepository
      */
     private $repo;
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\SectionRepository::getRoot
+     * @covers \BackBee\NestedNode\Repository\SectionRepository::getRoot
      */
     public function testGetRoot()
     {
@@ -111,7 +113,7 @@ class SectionRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\SectionRepository::getNativelyNodeChildren
+     * @covers \BackBee\NestedNode\Repository\SectionRepository::getNativelyNodeChildren
      */
     public function testGetNativelyNodeChildren()
     {
@@ -128,11 +130,11 @@ class SectionRepositoryTest extends TestCase
         $em = $this->application->getEntityManager();
 
         $st = new SchemaTool($em);
-        $st->createSchema(array($em->getClassMetaData('BackBuilder\NestedNode\Section')));
-        $st->createSchema(array($em->getClassMetaData('BackBuilder\NestedNode\Page')));
-        $st->createSchema(array($em->getClassMetaData('BackBuilder\Site\Site')));
+        $st->createSchema(array($em->getClassMetaData('BackBee\NestedNode\Section')));
+        $st->createSchema(array($em->getClassMetaData('BackBee\NestedNode\Page')));
+        $st->createSchema(array($em->getClassMetaData('BackBee\Site\Site')));
 
-        $this->repo = $em->getRepository('BackBuilder\NestedNode\Section');
+        $this->repo = $em->getRepository('BackBee\NestedNode\Section');
 
         $site = new Site('site_uid', array('label' => 'site mock'));
         $em->persist($site);
@@ -148,5 +150,4 @@ class SectionRepositoryTest extends TestCase
         $em->refresh($child1);
         $em->refresh($this->root);
     }
-
 }

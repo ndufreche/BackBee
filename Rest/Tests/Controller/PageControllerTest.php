@@ -272,7 +272,7 @@ class PageControllerTest extends RestTestCase
         $repo->insertNodeAsFirstChildOf($onlinePage2, $onlinePage);
 
         $this->em->flush();
-        
+
         $this->getAclManager()->insertOrUpdateObjectAce(
             $homePage,
             new UserSecurityIdentity('page_admin', 'BackBee\Security\Group'),

@@ -209,10 +209,10 @@ class ClassContentRepository extends EntityRepository
                 $nodes = $this->_em->getRepository('BackBee\NestedNode\Page')->findBy(array('_uid' => $parentnode));
                 if (count($nodes) != 0) {
                     $subquery = $this->getEntityManager()
-                            ->getRepository('BackBuilder\NestedNode\Section')
+                            ->getRepository('BackBee\NestedNode\Section')
                             ->createQueryBuilder('s')
                             ->select('s._uid');
-                    
+
                     $qOR = $subquery->expr()->orX();
                     if (true === $recursive) {
                         foreach ($nodes as $node) {
@@ -224,13 +224,13 @@ class ClassContentRepository extends EntityRepository
                     } else {
                         foreach ($nodes as $node) {
                             $qOR->add($subquery->expr()->eq('s._parent', $subquery->expr()->literal($node->getSection()->getUid())));
-                        }                        
+                        }
                     }
-                    
+
                     $subquery->andWhere($qOR);
-                    
+
                     $query = 'SELECT c.uid FROM page p LEFT JOIN content c ON c.node_uid = p.uid';
-                    $where[] = 'p.section_uid IN (' . $subquery->getQuery()->getSQL() . ')';
+                    $where[] = 'p.section_uid IN ('.$subquery->getQuery()->getSQL().')';
 
                     if (true === $limitToOnline) {
                         $where[] = 'p.state IN (1, 3)';
@@ -936,11 +936,11 @@ class ClassContentRepository extends EntityRepository
             return array();
         }
 
-        $sql = 'SELECT DISTINCT c.classname FROM content c WHERE c.uid IN (:content_uids)';
+        $sql = 'SELECT DISTINCT c.classname FROM content c WHERE c.uid IN :content_uids';
 
         return $this->getEntityManager()
             ->getConnection()
-            ->executeQuery($sql, array('content_uids' => implode(', ', $content_uids)))
+            ->executeQuery($sql, array('content_uids' => $content_uids))
             ->fetchAll(\PDO::FETCH_COLUMN)
         ;
     }

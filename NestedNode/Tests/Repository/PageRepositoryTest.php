@@ -23,11 +23,11 @@
 
 namespace BackBee\NestedNode\Tests\Repository;
 
-use BackBuilder\Tests\TestCase;
-use BackBuilder\Site\Site;
-use BackBuilder\Site\Layout;
-use BackBuilder\NestedNode\Page;
-use BackBuilder\NestedNode\Repository\PageQueryBuilder;
+use BackBee\NestedNode\Page;
+use BackBee\NestedNode\Repository\PageQueryBuilder;
+use BackBee\Site\Layout;
+use BackBee\Site\Site;
+use BackBee\Tests\TestCase;
 
 /**
  * @category    BackBee
@@ -37,7 +37,6 @@ use BackBuilder\NestedNode\Repository\PageQueryBuilder;
  */
 class PageRepositoryTest extends TestCase
 {
-
     /**
      * @var \BackBee\Tests\Mock\MockBBApplication
      */
@@ -58,11 +57,11 @@ class PageRepositoryTest extends TestCase
      */
     public function testCreateQueryBuilder()
     {
-        $this->assertInstanceOf('BackBuilder\NestedNode\Repository\PageQueryBuilder', $this->repo->createQueryBuilder('p'));
+        $this->assertInstanceOf('BackBee\NestedNode\Repository\PageQueryBuilder', $this->repo->createQueryBuilder('p'));
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::findBy
+     * @covers \BackBee\NestedNode\Repository\PageRepository::findBy
      */
     public function testFindBy()
     {
@@ -72,7 +71,7 @@ class PageRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::findOneBy
+     * @covers \BackBee\NestedNode\Repository\PageRepository::findOneBy
      */
     public function testFindOneBy()
     {
@@ -81,7 +80,7 @@ class PageRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::getAncestor
+     * @covers \BackBee\NestedNode\Repository\PageRepository::getAncestor
      */
     public function testGetAncestor()
     {
@@ -96,7 +95,7 @@ class PageRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::getAncestors
+     * @covers \BackBee\NestedNode\Repository\PageRepository::getAncestors
      */
     public function testGetAncestors()
     {
@@ -110,7 +109,7 @@ class PageRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::getOnlinePrevSibling
+     * @covers \BackBee\NestedNode\Repository\PageRepository::getOnlinePrevSibling
      */
     public function testGetOnlinePrevSibling()
     {
@@ -143,7 +142,7 @@ class PageRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::getOnlineSiblingsByLayout
+     * @covers \BackBee\NestedNode\Repository\PageRepository::getOnlineSiblingsByLayout
      */
     public function testGetOnlineSiblingsByLayout()
     {
@@ -176,7 +175,7 @@ class PageRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::getOnlineNextSibling
+     * @covers \BackBee\NestedNode\Repository\PageRepository::getOnlineNextSibling
      */
     public function testGetOnlineNextSibling()
     {
@@ -209,10 +208,10 @@ class PageRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::insertNodeAsFirstChildOf
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::insertNodeAsLastChildOf
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::insertNode
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::getMaxPosition
+     * @covers \BackBee\NestedNode\Repository\PageRepository::insertNodeAsFirstChildOf
+     * @covers \BackBee\NestedNode\Repository\PageRepository::insertNodeAsLastChildOf
+     * @covers \BackBee\NestedNode\Repository\PageRepository::insertNode
+     * @covers \BackBee\NestedNode\Repository\PageRepository::getMaxPosition
      */
     public function testInsertNode()
     {
@@ -265,8 +264,8 @@ class PageRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::insertNode
-     * @expectedException BackBuilder\Exception\InvalidArgumentException
+     * @covers \BackBee\NestedNode\Repository\PageRepository::insertNode
+     * @expectedException BackBee\Exception\InvalidArgumentException
      */
     public function testInsertNodeInNonSection()
     {
@@ -277,8 +276,8 @@ class PageRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::getDescendants
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::getOrderingDescendants
+     * @covers \BackBee\NestedNode\Repository\PageRepository::getDescendants
+     * @covers \BackBee\NestedNode\Repository\PageRepository::getOrderingDescendants
      */
     public function testGetDescendants()
     {
@@ -306,8 +305,8 @@ class PageRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::getOnlineDescendants
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::getOrderingDescendants
+     * @covers \BackBee\NestedNode\Repository\PageRepository::getOnlineDescendants
+     * @covers \BackBee\NestedNode\Repository\PageRepository::getOrderingDescendants
      */
     public function testGetOnlineDescendants()
     {
@@ -345,8 +344,8 @@ class PageRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::getVisibleDescendants
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::getOrderingDescendants
+     * @covers \BackBee\NestedNode\Repository\PageRepository::getVisibleDescendants
+     * @covers \BackBee\NestedNode\Repository\PageRepository::getOrderingDescendants
      */
     public function testGetVisibleDescendants()
     {
@@ -384,8 +383,8 @@ class PageRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::getNotDeletedDescendants
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::getOrderingDescendants
+     * @covers \BackBee\NestedNode\Repository\PageRepository::getNotDeletedDescendants
+     * @covers \BackBee\NestedNode\Repository\PageRepository::getOrderingDescendants
      */
     public function testGetNotDeletedDescendants()
     {
@@ -417,10 +416,10 @@ class PageRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::moveAsFirstChildOf
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::moveAsChildOf
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::movePageAsChildOf
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::moveSectionAsChildOf
+     * @covers \BackBee\NestedNode\Repository\PageRepository::moveAsFirstChildOf
+     * @covers \BackBee\NestedNode\Repository\PageRepository::moveAsChildOf
+     * @covers \BackBee\NestedNode\Repository\PageRepository::movePageAsChildOf
+     * @covers \BackBee\NestedNode\Repository\PageRepository::moveSectionAsChildOf
      */
     public function testMoveAsFirstChidOf()
     {
@@ -449,9 +448,9 @@ class PageRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::moveAsFirstChildOf
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::moveAsChildOf
-     * @expectedException \BackBuilder\Exception\InvalidArgumentException
+     * @covers \BackBee\NestedNode\Repository\PageRepository::moveAsFirstChildOf
+     * @covers \BackBee\NestedNode\Repository\PageRepository::moveAsChildOf
+     * @expectedException \BackBee\Exception\InvalidArgumentException
      */
     public function testMoveAsFirstChidOfNonSection()
     {
@@ -462,10 +461,10 @@ class PageRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::moveAsLastChildOf
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::moveAsChildOf
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::movePageAsChildOf
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::moveSectionAsChildOf
+     * @covers \BackBee\NestedNode\Repository\PageRepository::moveAsLastChildOf
+     * @covers \BackBee\NestedNode\Repository\PageRepository::moveAsChildOf
+     * @covers \BackBee\NestedNode\Repository\PageRepository::movePageAsChildOf
+     * @covers \BackBee\NestedNode\Repository\PageRepository::moveSectionAsChildOf
      */
     public function testMoveAsLastChidOf()
     {
@@ -499,9 +498,9 @@ class PageRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::moveAsLastChildOf
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::moveAsChildOf
-     * @expectedException \BackBuilder\Exception\InvalidArgumentException
+     * @covers \BackBee\NestedNode\Repository\PageRepository::moveAsLastChildOf
+     * @covers \BackBee\NestedNode\Repository\PageRepository::moveAsChildOf
+     * @expectedException \BackBee\Exception\InvalidArgumentException
      */
     public function testMoveAsLastChildOfNonSection()
     {
@@ -512,10 +511,10 @@ class PageRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::moveAsPrevSiblingOf
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::moveAsSiblingOf
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::movePageAsSiblingOf
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::moveSectionAsSiblingOf
+     * @covers \BackBee\NestedNode\Repository\PageRepository::moveAsPrevSiblingOf
+     * @covers \BackBee\NestedNode\Repository\PageRepository::moveAsSiblingOf
+     * @covers \BackBee\NestedNode\Repository\PageRepository::movePageAsSiblingOf
+     * @covers \BackBee\NestedNode\Repository\PageRepository::moveSectionAsSiblingOf
      */
     public function testMoveAsPrevSiblingOf()
     {
@@ -549,10 +548,10 @@ class PageRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::moveAsNextSiblingOf
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::moveAsSiblingOf
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::movePageAsSiblingOf
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::moveSectionAsSiblingOf
+     * @covers \BackBee\NestedNode\Repository\PageRepository::moveAsNextSiblingOf
+     * @covers \BackBee\NestedNode\Repository\PageRepository::moveAsSiblingOf
+     * @covers \BackBee\NestedNode\Repository\PageRepository::movePageAsSiblingOf
+     * @covers \BackBee\NestedNode\Repository\PageRepository::moveSectionAsSiblingOf
      */
     public function testMoveAsNextSiblingOf()
     {
@@ -586,8 +585,8 @@ class PageRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::moveAsSiblingOf
-     * @expectedException \BackBuilder\Exception\InvalidArgumentException
+     * @covers \BackBee\NestedNode\Repository\PageRepository::moveAsSiblingOf
+     * @expectedException \BackBee\Exception\InvalidArgumentException
      */
     public function testMoveAsSiblingOfRoot()
     {
@@ -596,8 +595,8 @@ class PageRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::movePageAsSiblingOf
-     * @expectedException \BackBuilder\Exception\InvalidArgumentException
+     * @covers \BackBee\NestedNode\Repository\PageRepository::movePageAsSiblingOf
+     * @expectedException \BackBee\Exception\InvalidArgumentException
      */
     public function testMoveNonSectionAsSiblingOfSection()
     {
@@ -607,8 +606,8 @@ class PageRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::moveSectionAsSiblingOf
-     * @expectedException \BackBuilder\Exception\InvalidArgumentException
+     * @covers \BackBee\NestedNode\Repository\PageRepository::moveSectionAsSiblingOf
+     * @expectedException \BackBee\Exception\InvalidArgumentException
      */
     public function testMoveSectionAsSiblingOfNonSection()
     {
@@ -618,7 +617,7 @@ class PageRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::getRoot
+     * @covers \BackBee\NestedNode\Repository\PageRepository::getRoot
      */
     public function testGetRoot()
     {
@@ -650,7 +649,7 @@ class PageRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::copy
+     * @covers \BackBee\NestedNode\Repository\PageRepository::copy
      */
     public function testCopy()
     {
@@ -659,29 +658,29 @@ class PageRepositoryTest extends TestCase
         $page1 = $this->repo->find('page1');
 
         $new_page1 = $this->invokeMethod($this->repo, 'copy', array($page1));
-        $this->assertInstanceOf('BackBuilder\NestedNode\Page', $new_page1);
+        $this->assertInstanceOf('BackBee\NestedNode\Page', $new_page1);
         $this->assertTrue($this->getEntityManager()->contains($new_page1));
         $this->assertFalse($new_page1->hasMainSection());
         $this->assertEquals('page1', $new_page1->getTitle());
         $this->assertEquals($page1->getParent(), $new_page1->getParent());
 
         $new_page2 = $this->invokeMethod($this->repo, 'copy', array($page1, 'new_title'));
-        $this->assertInstanceOf('BackBuilder\NestedNode\Page', $new_page2);
+        $this->assertInstanceOf('BackBee\NestedNode\Page', $new_page2);
         $this->assertEquals('new_title', $new_page2->getTitle());
 
         $new_page3 = $this->invokeMethod($this->repo, 'copy', array($page1, 'new_title', $section2));
-        $this->assertInstanceOf('BackBuilder\NestedNode\Page', $new_page3);
+        $this->assertInstanceOf('BackBee\NestedNode\Page', $new_page3);
         $this->assertEquals($section2, $new_page3->getParent());
 
         $new_section = $this->invokeMethod($this->repo, 'copy', array($section1, 'new_section', $this->root));
-        $this->assertInstanceOf('BackBuilder\NestedNode\Page', $new_section);
+        $this->assertInstanceOf('BackBee\NestedNode\Page', $new_section);
         $this->assertTrue($new_section->hasMainSection());
         $this->assertEquals($this->root->getSection(), $new_section->getSection()->getParent());
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::copy
-     * @expectedException \BackBuilder\Exception\InvalidArgumentException
+     * @covers \BackBee\NestedNode\Repository\PageRepository::copy
+     * @expectedException \BackBee\Exception\InvalidArgumentException
      */
     public function testCopyDeletedPage()
     {
@@ -691,13 +690,13 @@ class PageRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::duplicate
+     * @covers \BackBee\NestedNode\Repository\PageRepository::duplicate
      */
     public function testDuplicate()
     {
         // Duplicate a root not recursively to new a one
         $clone1 = $this->repo->duplicate($this->root, null, null, false);
-        $this->assertInstanceOf('BackBuilder\NestedNode\Page', $clone1);
+        $this->assertInstanceOf('BackBee\NestedNode\Page', $clone1);
         $this->assertNull($clone1->getParent());
         $this->assertEquals('root', $clone1->getTitle());
         $this->assertTrue($clone1->hasMainSection());
@@ -708,30 +707,30 @@ class PageRepositoryTest extends TestCase
         // Duplicate a root not recursively to one of its descendant
         $section1 = $this->repo->find('section1');
         $clone2 = $this->repo->duplicate($this->root, null, $section1, false);
-        $this->assertInstanceOf('BackBuilder\NestedNode\Page', $clone2);
+        $this->assertInstanceOf('BackBee\NestedNode\Page', $clone2);
         $this->assertEquals($section1, $clone2->getParent());
         $this->assertTrue($clone2->hasMainSection());
 
         // Duplicate a section not recursively to another one
         $section2 = $this->repo->find('section2');
         $section3 = $this->repo->duplicate($section2, null, $section1, false);
-        $this->assertInstanceOf('BackBuilder\NestedNode\Page', $section3);
+        $this->assertInstanceOf('BackBee\NestedNode\Page', $section3);
         $this->assertEquals($section1, $section3->getParent());
         $this->assertTrue($section3->hasMainSection());
 
         // Duplicate a page in a section with a new title
         $page3 = $this->repo->find('page3');
         $page4 = $this->repo->duplicate($page3, 'page4', $section1, false);
-        $this->assertInstanceOf('BackBuilder\NestedNode\Page', $page4);
+        $this->assertInstanceOf('BackBee\NestedNode\Page', $page4);
         $this->assertEquals($section1, $page4->getParent());
         $this->assertFalse($page4->hasMainSection());
         $this->assertEquals('page4', $page4->getTitle());
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::duplicateRecursively
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::updateMainNodePostCloning
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::updateRelatedPostCloning
+     * @covers \BackBee\NestedNode\Repository\PageRepository::duplicateRecursively
+     * @covers \BackBee\NestedNode\Repository\PageRepository::updateMainNodePostCloning
+     * @covers \BackBee\NestedNode\Repository\PageRepository::updateRelatedPostCloning
      */
     public function testDuplicateRecursively()
     {
@@ -748,7 +747,7 @@ class PageRepositoryTest extends TestCase
 
         // Recursively duplicate a tree
         $clone1 = $this->repo->duplicate($this->root);
-        $this->assertInstanceOf('BackBuilder\NestedNode\Page', $clone1);
+        $this->assertInstanceOf('BackBee\NestedNode\Page', $clone1);
         $this->assertNull($clone1->getParent());
         $this->assertEquals('root', $clone1->getTitle());
         $this->assertTrue($clone1->hasMainSection());
@@ -784,8 +783,8 @@ class PageRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::duplicateRecursively
-     * @expectedException \BackBuilder\Exception\InvalidArgumentException
+     * @covers \BackBee\NestedNode\Repository\PageRepository::duplicateRecursively
+     * @expectedException \BackBee\Exception\InvalidArgumentException
      */
     public function testDuplicatePageIn0neOfItsDescendants()
     {
@@ -794,7 +793,7 @@ class PageRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::saveWithSection
+     * @covers \BackBee\NestedNode\Repository\PageRepository::saveWithSection
      */
     public function testSaveWithSection()
     {
@@ -812,7 +811,7 @@ class PageRepositoryTest extends TestCase
     }
 
     /**
-     * @covers \BackBuilder\NestedNode\Repository\PageRepository::shiftPosition
+     * @covers \BackBee\NestedNode\Repository\PageRepository::shiftPosition
      */
     public function testShiftPosition()
     {
@@ -887,14 +886,14 @@ class PageRepositoryTest extends TestCase
         $em = $this->getEntityManager();
         $st = new \Doctrine\ORM\Tools\SchemaTool($em);
         $st->updateSchema(array(
-            $em->getClassMetaData('BackBuilder\ClassContent\AClassContent'),
-            $em->getClassMetaData('BackBuilder\ClassContent\Indexes\IdxContentContent'),
-            $em->getClassMetaData('BackBuilder\ClassContent\Indexes\IdxSiteContent'),
-            $em->getClassMetaData('BackBuilder\ClassContent\Indexes\OptContentByModified'),
-            $em->getClassMetaData('BackBuilder\Site\Site'),
-            $em->getClassMetaData('BackBuilder\Site\Layout'),
-            $em->getClassMetaData('BackBuilder\NestedNode\Page'),
-            $em->getClassMetaData('BackBuilder\NestedNode\Section'),
+            $em->getClassMetaData('BackBee\ClassContent\AClassContent'),
+            $em->getClassMetaData('BackBee\ClassContent\Indexes\IdxContentContent'),
+            $em->getClassMetaData('BackBee\ClassContent\Indexes\IdxSiteContent'),
+            $em->getClassMetaData('BackBee\ClassContent\Indexes\OptContentByModified'),
+            $em->getClassMetaData('BackBee\Site\Site'),
+            $em->getClassMetaData('BackBee\Site\Layout'),
+            $em->getClassMetaData('BackBee\NestedNode\Page'),
+            $em->getClassMetaData('BackBee\NestedNode\Section'),
         ));
 
         $this->application->start();
@@ -913,7 +912,7 @@ class PageRepositoryTest extends TestCase
         $this->getEntityManager()->persist($this->root);
         $this->getEntityManager()->flush();
 
-        $this->repo = $this->getEntityManager()->getRepository('BackBuilder\NestedNode\Page');
+        $this->repo = $this->getEntityManager()->getRepository('BackBee\NestedNode\Page');
 
         /**
          * Create mock tree:
@@ -969,11 +968,11 @@ class PageRepositoryTest extends TestCase
 
     /**
      * Add a new page in mock tree
-     * @param string $uid
-     * @param \BackBuilder\Site\Layout $layout
-     * @param \BackBuilder\NestedNode\Page $parent
-     * @param boolean $section                       If TRUE, the page is inserted with a section
-     * @return \BackBuilder\NestedNode\Page
+     * @param  string                   $uid
+     * @param  \BackBee\Site\Layout     $layout
+     * @param  \BackBee\NestedNode\Page $parent
+     * @param  boolean                  $section If TRUE, the page is inserted with a section
+     * @return \BackBee\NestedNode\Page
      */
     private function addPage($uid, Layout $layout, Page $parent, $section = false)
     {
@@ -989,5 +988,4 @@ class PageRepositoryTest extends TestCase
 
         return $page;
     }
-
 }

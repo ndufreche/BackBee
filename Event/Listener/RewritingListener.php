@@ -101,7 +101,7 @@ class RewritingListener
 
         if (true === self::updateUrl($application, $page, $maincontent) && true == $page->hasMainSection()) {
             $descendants = $application->getEntityManager()
-                    ->getRepository('BackBuilder\NestedNode\Page')
+                    ->getRepository('BackBee\NestedNode\Page')
                     ->getDescendants($page, 1);
             foreach ($descendants as $descendant) {
                 self::updateUrl($application, $descendant);

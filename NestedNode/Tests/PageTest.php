@@ -1,58 +1,59 @@
 <?php
 
 /*
- * Copyright (c) 2011-2013 Lp digital system
+ * Copyright (c) 2011-2015 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
  */
 
-namespace BackBuilder\NestedNode\Tests;
+namespace BackBee\NestedNode\Tests;
 
-use BackBuilder\ClassContent\ContentSet;
-use BackBuilder\MetaData\MetaDataBag;
-use BackBuilder\NestedNode\Section;
-use BackBuilder\NestedNode\Page;
-use BackBuilder\NestedNode\PageRevision;
-use BackBuilder\Workflow\State;
-use BackBuilder\Site\Layout;
-use BackBuilder\Site\Site;
-use BackBuilder\Tests\TestCase;
+use BackBee\ClassContent\ContentSet;
+use BackBee\MetaData\MetaDataBag;
+use BackBee\NestedNode\Page;
+use BackBee\NestedNode\PageRevision;
+use BackBee\NestedNode\Section;
+use BackBee\Site\Layout;
+use BackBee\Site\Site;
+use BackBee\Tests\TestCase;
+use BackBee\Workflow\State;
 
 /**
- * @category    BackBuilder
- * @package     BackBuilder\NestedNode\Tests
+ * @category    BackBee
+ * @package     BackBee\NestedNode\Tests
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class PageTest extends TestCase
 {
-
     /**
      * @var \Datetime
      */
     private $current_time;
 
     /**
-     * @var \BackBuilder\NestedNode\Page
+     * @var \BackBee\NestedNode\Page
      */
     private $page;
 
     /**
-     * @covers BackBuilder\NestedNode\Page::__construct
-     * @covers BackBuilder\NestedNode\Page::setDefaultProperties
+     * @covers BackBee\NestedNode\Page::__construct
+     * @covers BackBee\NestedNode\Page::setDefaultProperties
      */
     public function test__construct()
     {
@@ -66,9 +67,9 @@ class PageTest extends TestCase
         $this->assertEquals(Page::DEFAULT_TARGET, $page->getTarget());
         $this->assertInstanceOf('\DateTime', $page->getCreated());
         $this->assertInstanceOf('\DateTime', $page->getModified());
-        $this->assertInstanceOf('BackBuilder\ClassContent\ContentSet', $page->getContentSet());
+        $this->assertInstanceOf('BackBee\ClassContent\ContentSet', $page->getContentSet());
         $this->assertInstanceOf('Doctrine\Common\Collections\ArrayCollection', $page->getRevisions());
-        $this->assertInstanceOf('BackBuilder\NestedNode\Section', $page->getSection());
+        $this->assertInstanceOf('BackBee\NestedNode\Section', $page->getSection());
         $this->assertTrue($page->hasMainSection());
         $this->assertEquals($page->getUid(), $page->getSection()->getUid());
 
@@ -80,8 +81,8 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::__clone
-     * @covers BackBuilder\NestedNode\Page::setDefaultProperties
+     * @covers BackBee\NestedNode\Page::__clone
+     * @covers BackBee\NestedNode\Page::setDefaultProperties
      */
     public function test__clone()
     {
@@ -118,7 +119,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::getUrl
+     * @covers BackBee\NestedNode\Page::getUrl
      */
     public function testGetUrl()
     {
@@ -131,7 +132,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::getNormalizeUri
+     * @covers BackBee\NestedNode\Page::getNormalizeUri
      */
     public function testGetNormalizeUri()
     {
@@ -143,7 +144,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::getTarget
+     * @covers BackBee\NestedNode\Page::getTarget
      */
     public function testGetTarget()
     {
@@ -154,7 +155,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::isRedirect
+     * @covers BackBee\NestedNode\Page::isRedirect
      */
     public function testIsRedirect()
     {
@@ -165,7 +166,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::getData
+     * @covers BackBee\NestedNode\Page::getData
      */
     public function testGetData()
     {
@@ -175,7 +176,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::getParam
+     * @covers BackBee\NestedNode\Page::getParam
      */
     public function testGetParam()
     {
@@ -183,7 +184,7 @@ class PageTest extends TestCase
             'left' => 1,
             'right' => 2,
             'level' => 0,
-            'position' => 0
+            'position' => 0,
         );
 
         $this->assertEquals($params, $this->page->getParam());
@@ -195,7 +196,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::isScheduled
+     * @covers BackBee\NestedNode\Page::isScheduled
      */
     public function testIsScheduled()
     {
@@ -215,7 +216,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::isVisible
+     * @covers BackBee\NestedNode\Page::isVisible
      */
     public function testIsVisble()
     {
@@ -229,7 +230,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::isOnline
+     * @covers BackBee\NestedNode\Page::isOnline
      */
     public function testIsOnline()
     {
@@ -269,7 +270,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::isDeleted
+     * @covers BackBee\NestedNode\Page::isDeleted
      */
     public function testIsDeleted()
     {
@@ -280,7 +281,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::setSite
+     * @covers BackBee\NestedNode\Page::setSite
      */
     public function testSetSite()
     {
@@ -293,7 +294,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::setContentSet
+     * @covers BackBee\NestedNode\Page::setContentSet
      */
     public function testSetContentSet()
     {
@@ -303,7 +304,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::setDate
+     * @covers BackBee\NestedNode\Page::setDate
      */
     public function testSetDate()
     {
@@ -314,15 +315,15 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::setLayout
-     * @covers BackBuilder\NestedNode\Page::getInheritedContent
-     * @covers BackBuilder\NestedNode\Page::createNewDefaultContent
+     * @covers BackBee\NestedNode\Page::setLayout
+     * @covers BackBee\NestedNode\Page::getInheritedContent
+     * @covers BackBee\NestedNode\Page::createNewDefaultContent
      */
     public function testSetLayout()
     {
         $this->assertEquals(2, $this->page->getContentSet()->count());
         $this->assertEquals(1, $this->page->getContentSet()->first()->count());
-        $this->assertInstanceOf('BackBuilder\ClassContent\ContentSet', $this->page->getContentSet()->first()->first());
+        $this->assertInstanceOf('BackBee\ClassContent\ContentSet', $this->page->getContentSet()->first()->first());
         $this->assertEquals($this->page, $this->page->getContentSet()->first()->first()->getMainNode());
         $this->assertEquals(0, $this->page->getContentSet()->last()->count());
 
@@ -342,7 +343,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::setAltTitle
+     * @covers BackBee\NestedNode\Page::setAltTitle
      */
     public function testSetAltTitle()
     {
@@ -351,7 +352,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::setTitle
+     * @covers BackBee\NestedNode\Page::setTitle
      */
     public function testSetTitle()
     {
@@ -360,7 +361,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::setUrl
+     * @covers BackBee\NestedNode\Page::setUrl
      */
     public function testSetUrl()
     {
@@ -369,7 +370,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::setTarget
+     * @covers BackBee\NestedNode\Page::setTarget
      */
     public function testSetTarget()
     {
@@ -378,7 +379,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::setRedirect
+     * @covers BackBee\NestedNode\Page::setRedirect
      */
     public function testSetRedirect()
     {
@@ -387,7 +388,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::setMetaData
+     * @covers BackBee\NestedNode\Page::setMetaData
      */
     public function testSetMetaData()
     {
@@ -399,7 +400,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::setState
+     * @covers BackBee\NestedNode\Page::setState
      */
     public function testSetState()
     {
@@ -408,7 +409,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::setPublishing
+     * @covers BackBee\NestedNode\Page::setPublishing
      */
     public function testSetPublishing()
     {
@@ -419,7 +420,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::setArchiving
+     * @covers BackBee\NestedNode\Page::setArchiving
      */
     public function testSetArchiving()
     {
@@ -430,7 +431,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::setRevisions
+     * @covers BackBee\NestedNode\Page::setRevisions
      */
     public function testSetRevisions()
     {
@@ -440,7 +441,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::setWorkflowState
+     * @covers BackBee\NestedNode\Page::setWorkflowState
      */
     public function testSetWorkflowState()
     {
@@ -452,7 +453,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::setLevel
+     * @covers BackBee\NestedNode\Page::setLevel
      */
     public function testSetLevel()
     {
@@ -461,8 +462,8 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::setLevel
-     * @expectedException BackBuilder\Exception\InvalidArgumentException
+     * @covers BackBee\NestedNode\Page::setLevel
+     * @expectedException BackBee\Exception\InvalidArgumentException
      */
     public function testSetNonNumericLevel()
     {
@@ -470,7 +471,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::setPosition
+     * @covers BackBee\NestedNode\Page::setPosition
      */
     public function testSetPosition()
     {
@@ -479,8 +480,8 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::setPosition
-     * @expectedException BackBuilder\Exception\InvalidArgumentException
+     * @covers BackBee\NestedNode\Page::setPosition
+     * @expectedException BackBee\Exception\InvalidArgumentException
      */
     public function testSetNonNumericPosition()
     {
@@ -488,17 +489,17 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::setPosition
+     * @covers BackBee\NestedNode\Page::setPosition
      */
     public function testSetModified()
     {
-        $now = new \Datetime;
+        $now = new \Datetime();
         $this->assertEquals($this->page, $this->page->setModified($now));
         $this->assertEquals($now, $this->page->getModified());
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::getInheritedContensetZoneParams
+     * @covers BackBee\NestedNode\Page::getInheritedContensetZoneParams
      */
     public function testGetInheritedContensetZoneParams()
     {
@@ -518,7 +519,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::getRootContentSetPosition
+     * @covers BackBee\NestedNode\Page::getRootContentSetPosition
      */
     public function testGetRootContentSetPosition()
     {
@@ -531,7 +532,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::getParentZoneAtSamePositionIfExists
+     * @covers BackBee\NestedNode\Page::getParentZoneAtSamePositionIfExists
      */
     public function testGetParentZoneAtSamePositionIfExists()
     {
@@ -566,7 +567,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::getInheritedZones
+     * @covers BackBee\NestedNode\Page::getInheritedZones
      */
     public function testGetInheritedZones()
     {
@@ -584,7 +585,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::getPageMainZones
+     * @covers BackBee\NestedNode\Page::getPageMainZones
      */
     public function testGetPageMainZones()
     {
@@ -595,7 +596,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::isLinkedToHisParentBy
+     * @covers BackBee\NestedNode\Page::isLinkedToHisParentBy
      */
     public function testIsLinkedToHisParentBy()
     {
@@ -612,7 +613,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::replaceRootContentSet
+     * @covers BackBee\NestedNode\Page::replaceRootContentSet
      */
     public function testReplaceRootContentSet()
     {
@@ -643,7 +644,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::toArray
+     * @covers BackBee\NestedNode\Page::toArray
      */
     public function testToArray()
     {
@@ -669,7 +670,7 @@ class PageTest extends TestCase
             'metadata' => null,
             'layout_uid' => $this->page->getLayout()->getUid(),
             'workflow_state' => null,
-            'section' => true
+            'section' => true,
         );
 
         $this->assertEquals($expected, $this->page->toArray());
@@ -703,7 +704,7 @@ class PageTest extends TestCase
             'metadata' => array(),
             'layout_uid' => $this->page->getLayout()->getUid(),
             'workflow_state' => 1,
-            'section' => true
+            'section' => true,
         );
 
         $this->assertEquals($expected, $this->page->toArray());
@@ -734,15 +735,15 @@ class PageTest extends TestCase
             'metadata' => null,
             'layout_uid' => null,
             'workflow_state' => null,
-            'section' => false
+            'section' => false,
         );
 
         $this->assertEquals($expected, $child->toArray());
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::serialize
-     * @covers BackBuilder\NestedNode\Page::_setDateTimeValue
+     * @covers BackBee\NestedNode\Page::serialize
+     * @covers BackBee\NestedNode\Page::_setDateTimeValue
      */
     public function testUnserialize()
     {
@@ -762,7 +763,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::getOldState
+     * @covers BackBee\NestedNode\Page::getOldState
      */
     public function testGetOldState()
     {
@@ -772,7 +773,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::setOldState
+     * @covers BackBee\NestedNode\Page::setOldState
      */
     public function testSetOldState()
     {
@@ -780,7 +781,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::setUseUrlRedirect
+     * @covers BackBee\NestedNode\Page::setUseUrlRedirect
      */
     public function testSetUseUrlRedirect()
     {
@@ -788,7 +789,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::getUseUrlRedirect
+     * @covers BackBee\NestedNode\Page::getUseUrlRedirect
      */
     public function testGetUseUrlRedirect()
     {
@@ -798,7 +799,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::hasMainSection()
+     * @covers BackBee\NestedNode\Page::hasMainSection()
      */
     public function testHasMainSection()
     {
@@ -811,7 +812,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::setMainSection()
+     * @covers BackBee\NestedNode\Page::setMainSection()
      */
     public function testSetMainSection()
     {
@@ -827,7 +828,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::setSection()
+     * @covers BackBee\NestedNode\Page::setSection()
      */
     public function testSetSection()
     {
@@ -842,7 +843,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::getSection()
+     * @covers BackBee\NestedNode\Page::getSection()
      */
     public function testGetSection()
     {
@@ -854,7 +855,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::isLeaf()
+     * @covers BackBee\NestedNode\Page::isLeaf()
      */
     public function testIsLeaf()
     {
@@ -866,7 +867,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::isAncestorOf()
+     * @covers BackBee\NestedNode\Page::isAncestorOf()
      */
     public function testIsAncestorOf()
     {
@@ -885,7 +886,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::isAncestorOf()
+     * @covers BackBee\NestedNode\Page::isAncestorOf()
      */
     public function testIsDescendantOf()
     {
@@ -903,7 +904,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::getRoot()
+     * @covers BackBee\NestedNode\Page::getRoot()
      */
     public function testGetRoot()
     {
@@ -915,7 +916,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::isRoot()
+     * @covers BackBee\NestedNode\Page::isRoot()
      */
     public function testIsRoot()
     {
@@ -933,7 +934,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::setParent()
+     * @covers BackBee\NestedNode\Page::setParent()
      */
     public function testSetParent()
     {
@@ -957,8 +958,8 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::setParent()
-     * @expectedException \BackBuilder\Exception\InvalidArgumentException
+     * @covers BackBee\NestedNode\Page::setParent()
+     * @expectedException \BackBee\Exception\InvalidArgumentException
      */
     public function testSetParentWithLeaf()
     {
@@ -969,7 +970,7 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::getParent()
+     * @covers BackBee\NestedNode\Page::getParent()
      */
     public function testGetParent()
     {
@@ -987,8 +988,8 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Page::getLeftnode()
-     * @covers BackBuilder\NestedNode\Page::getRightnode()
+     * @covers BackBee\NestedNode\Page::getLeftnode()
+     * @covers BackBee\NestedNode\Page::getRightnode()
      */
     public function testGetNode()
     {
@@ -1047,5 +1048,4 @@ class PageTest extends TestCase
 
         return $data;
     }
-
 }

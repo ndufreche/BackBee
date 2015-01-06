@@ -107,8 +107,8 @@ EOF
     {
         if (0 <= version_compare(BBApplication::VERSION, '0.11.0')) {
             $schemaManager = $this->em->getConnection()->getSchemaManager();
-            $pageName = $this->em->getClassMetadata('BackBuilder\NestedNode\Page')->getTableName();
-            $sectionName = $this->em->getClassMetadata('BackBuilder\NestedNode\Section')->getTableName();
+            $pageName = $this->em->getClassMetadata('BackBee\NestedNode\Page')->getTableName();
+            $sectionName = $this->em->getClassMetadata('BackBee\NestedNode\Section')->getTableName();
 
             if (false === $schemaManager->tablesExist($sectionName) && true === $schemaManager->tablesExist($pageName)) {
                 throw new BBException(sprintf('Table `%s` does not exist. Perhaps you should launch upgrade:0.10:0.11 command before.', $sectionName));

@@ -258,7 +258,7 @@ class UrlGenerator implements IUrlGenerator
         if (1 === preg_match('#(.*)\/$#', $baseurl, $matches)) {
             $baseurl = $matches[1].'-%d/';
             $query = $page_repository->createQueryBuilder('p');
-            $existings = $query->where($query->getSectionAlias() . '._root = :root')
+            $existings = $query->where($query->getSectionAlias().'._root = :root')
                 ->setParameter('root', $page->getRoot())
                 ->andWhere('p._url LIKE :url')
                 ->setParameter('url', $matches[1].'%/')

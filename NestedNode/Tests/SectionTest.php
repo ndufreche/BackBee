@@ -1,52 +1,53 @@
 <?php
 
 /*
- * Copyright (c) 2011-2013 Lp digital system
- * 
- * This file is part of BackBuilder5.
+ * Copyright (c) 2011-2015 Lp digital system
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * This file is part of BackBee.
+ *
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
- * BackBuilder5 is distributed in the hope that it will be useful,
+ *
+ * BackBee is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
  */
 
-namespace BackBuilder\NestedNode\Tests;
+namespace BackBee\NestedNode\Tests;
 
-use BackBuilder\NestedNode\Section;
-use BackBuilder\NestedNode\Page;
-use BackBuilder\Site\Site;
-use BackBuilder\Tests\TestCase;
+use BackBee\NestedNode\Page;
+use BackBee\NestedNode\Section;
+use BackBee\Site\Site;
+use BackBee\Tests\TestCase;
 
 /**
- * @category    BackBuilder
- * @package     BackBuilder\NestedNode\Tests
+ * @category    BackBee
+ * @package     BackBee\NestedNode\Tests
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class SectionTest extends TestCase
 {
-
     /**
      * @var \Datetime
      */
     private $current_time;
 
     /**
-     * @var \BackBuilder\NestedNode\Section
+     * @var \BackBee\NestedNode\Section
      */
     private $section;
 
     /**
-     * @covers BackBuilder\NestedNode\Section::__construct
+     * @covers BackBee\NestedNode\Section::__construct
      */
     public function test__construct()
     {
@@ -58,7 +59,7 @@ class SectionTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Section::__construct
+     * @covers BackBee\NestedNode\Section::__construct
      */
     public function test__constructWithOptions()
     {
@@ -71,7 +72,7 @@ class SectionTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Section::__clone
+     * @covers BackBee\NestedNode\Section::__clone
      */
     public function test__clone()
     {
@@ -102,7 +103,7 @@ class SectionTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Section::setPage
+     * @covers BackBee\NestedNode\Section::setPage
      */
     public function testSetPage()
     {
@@ -114,7 +115,7 @@ class SectionTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Section::setSite
+     * @covers BackBee\NestedNode\Section::setSite
      */
     public function testSetSite()
     {
@@ -128,7 +129,7 @@ class SectionTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Section::toArray
+     * @covers BackBee\NestedNode\Section::toArray
      */
     public function testToArray()
     {
@@ -143,7 +144,7 @@ class SectionTest extends TestCase
             'created' => $current_time->getTimestamp(),
             'modified' => $current_time->getTimestamp(),
             'isleaf' => false,
-            'siteuid' => null
+            'siteuid' => null,
         );
 
         $section = new Section('test');
@@ -155,12 +156,11 @@ class SectionTest extends TestCase
     }
 
     /**
-     * @covers BackBuilder\NestedNode\Section::isLeaf
+     * @covers BackBee\NestedNode\Section::isLeaf
      */
     public function testIsLeaf()
     {
         $section = new Section();
         $this->assertFalse($section->isLeaf());
     }
-
 }

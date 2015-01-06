@@ -1,42 +1,45 @@
 <?php
 
 /*
- * Copyright (c) 2011-2013 Lp digital system
+ * Copyright (c) 2011-2015 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
  */
 
-namespace BackBuilder\NestedNode;
+namespace BackBee\NestedNode;
 
-use BackBuilder\Security\Acl\Domain\AObjectIdentifiable;
-use BackBuilder\ClassContent\AClassContent;
-use BackBuilder\ClassContent\ContentSet;
-use BackBuilder\Exception\InvalidArgumentException;
-use BackBuilder\MetaData\MetaDataBag;
-use BackBuilder\Renderer\IRenderable;
-use BackBuilder\Site\Layout;
-use BackBuilder\Site\Site;
-use BackBuilder\Workflow\State;
-use BackBuilder\Util\Numeric;
 use Doctrine\Common\Collections\ArrayCollection;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
 
+use BackBee\ClassContent\AClassContent;
+use BackBee\ClassContent\ContentSet;
+use BackBee\Exception\InvalidArgumentException;
+use BackBee\MetaData\MetaDataBag;
+use BackBee\Renderer\IRenderable;
+use BackBee\Security\Acl\Domain\AObjectIdentifiable;
+use BackBee\Site\Layout;
+use BackBee\Site\Site;
+use BackBee\Util\Numeric;
+use BackBee\Workflow\State;
+
 /**
- * Page object in BackBuilder
+ * Page object in BackBee
  *
  * A page basically is an URI an a set of content defined for a website.
  * A page must have a layout defined to be displayed.
@@ -48,12 +51,12 @@ use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
  * * STATE_HIDDEN
  * * STATE_DELETED
  *
- * @category    BackBuilder
- * @package     BackBuilder\NestedNode
+ * @category    BackBee
+ * @package     BackBee\NestedNode
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  * @author      Micael Malta <mmalta@nextinteractive.fr>
- * @Entity(repositoryClass="BackBuilder\NestedNode\Repository\PageRepository")
+ * @Entity(repositoryClass="BackBee\NestedNode\Repository\PageRepository")
  * @Table(name="page",indexes=
  * {
  * @index(columns={"state"}),
@@ -69,7 +72,6 @@ use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
  */
 class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInterface
 {
-
     /**
      * State off-line: the page can not be displayed on the website
      * @var int
@@ -126,8 +128,8 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * The layout associated to the page
-     * @var \BackBuilder\Site\Layout
-     * @ManyToOne(targetEntity="BackBuilder\Site\Layout", inversedBy="_pages", fetch="EXTRA_LAZY")
+     * @var \BackBee\Site\Layout
+     * @ManyToOne(targetEntity="BackBee\Site\Layout", inversedBy="_pages", fetch="EXTRA_LAZY")
      * @JoinColumn(name="layout_uid", referencedColumnName="uid", nullable=false)
      */
     protected $_layout;
@@ -186,15 +188,15 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Metadatas associated to the page
-     * @var \BackBuilder\MetaData\MetaDataBag
+     * @var \BackBee\MetaData\MetaDataBag
      * @Column(type="object", name="metadata", nullable=true)
      */
     protected $_metadata;
 
     /**
      * The associated ContentSet
-     * @var \BackBuilder\ClassContent\ContentSet
-     * @ManyToOne(targetEntity="BackBuilder\ClassContent\ContentSet", inversedBy="_pages", cascade={"persist", "remove"}, fetch="EXTRA_LAZY")
+     * @var \BackBee\ClassContent\ContentSet
+     * @ManyToOne(targetEntity="BackBee\ClassContent\ContentSet", inversedBy="_pages", cascade={"persist", "remove"}, fetch="EXTRA_LAZY")
      * @JoinColumn(name="contentset", referencedColumnName="uid")
      */
     protected $_contentset;
@@ -243,8 +245,8 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * The optional workflow state.
-     * @var \BackBuilder\Workflow\State
-     * @ManyToOne(targetEntity="BackBuilder\Workflow\State", fetch="EXTRA_LAZY")
+     * @var \BackBee\Workflow\State
+     * @ManyToOne(targetEntity="BackBee\Workflow\State", fetch="EXTRA_LAZY")
      * @JoinColumn(name="workflow_state", referencedColumnName="uid")
      */
     protected $_workflow_state;
@@ -252,7 +254,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
     /**
      * Revisions of the current page
      * @var \Doctrine\Common\Collections\ArrayCollection
-     * @OneToMany(targetEntity="BackBuilder\NestedNode\PageRevision", mappedBy="_page", fetch="EXTRA_LAZY")
+     * @OneToMany(targetEntity="BackBee\NestedNode\PageRevision", mappedBy="_page", fetch="EXTRA_LAZY")
      */
     protected $_revisions;
 
@@ -286,16 +288,16 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * The section node.
-     * @var \BackBuilder\NestedNode\Section
-     * @ManyToOne(targetEntity="BackBuilder\NestedNode\Section", inversedBy="_pages", cascade={"persist"}, fetch="EXTRA_LAZY")
+     * @var \BackBee\NestedNode\Section
+     * @ManyToOne(targetEntity="BackBee\NestedNode\Section", inversedBy="_pages", cascade={"persist"}, fetch="EXTRA_LAZY")
      * @JoinColumn(name="section_uid", referencedColumnName="uid", nullable=false)
      */
     public $_section;
 
     /**
      * The associated page of this section
-     * @var \BackBuilder\NestedNode\Section
-     * @OneToOne(targetEntity="BackBuilder\NestedNode\Section", mappedBy="_page", cascade={"persist"}, fetch="EXTRA_LAZY")
+     * @var \BackBee\NestedNode\Section
+     * @OneToOne(targetEntity="BackBee\NestedNode\Section", mappedBy="_page", cascade={"persist"}, fetch="EXTRA_LAZY")
      */
     public $_mainsection;
 
@@ -350,11 +352,11 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Class constructor
-     * @param string $uid The unique identifier of the page
-     * @param array $options Initial options for the page:
-     *                         - main_section   the main section associated to the page
-     *                         - title          the default title
-     *                         - url            the default url
+     * @param string $uid     The unique identifier of the page
+     * @param array  $options Initial options for the page:
+     *                        - main_section   the main section associated to the page
+     *                        - title          the default title
+     *                        - url            the default url
      */
     public function __construct($uid = null, $options = null)
     {
@@ -367,11 +369,11 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Sets the default values to properties
-     * @param string $uid
-     * @param \BackBuilder\NestedNode\Section $section
-     * @param string $title
-     * @param string $url
-     * @return \BackBuilder\NestedNode\Page
+     * @param  string                      $uid
+     * @param  \BackBee\NestedNode\Section $section
+     * @param  string                      $title
+     * @param  string                      $url
+     * @return \BackBee\NestedNode\Page
      */
     private function setDefaultProperties($uid = null, Section $main_section = null, $title = null, $url = null, $target = self::DEFAULT_TARGET)
     {
@@ -400,7 +402,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
         $source_uid = $this->_uid;
         $this->cloning_data = array(
             'pages' => array(),
-            'contents' => array()
+            'contents' => array(),
         );
 
         if (null !== $this->_contentset && null !== $this->getLayout()) {
@@ -436,7 +438,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Returns the main contentset associated to the node.
-     * @return \BackBuilder\ClassContent\ContentSet
+     * @return \BackBee\ClassContent\ContentSet
      * @codeCoverageIgnore
      */
     public function getContentSet()
@@ -450,7 +452,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Return sthe layout of the page.
-     * @return \BackBuilder\Site\Layout
+     * @return \BackBee\Site\Layout
      * @codeCoverageIgnore
      */
     public function getLayout()
@@ -539,7 +541,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Returns the associated metadata if defined
-     * @return \BackBuilder\MetaData\MetaDataBag|NULL
+     * @return \BackBee\MetaData\MetaDataBag|NULL
      * @codeCoverageIgnore
      */
     public function getMetaData()
@@ -628,7 +630,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
             'left' => $this->getLeftnode(),
             'right' => $this->getRightnode(),
             'level' => $this->getLevel(),
-            'position' => $this->getPosition()
+            'position' => $this->getPosition(),
         );
 
         if (null !== $var) {
@@ -644,7 +646,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Returns the worflow state if defined, NULL otherwise
-     * @return \BackBuilder\Workflow\State
+     * @return \BackBee\Workflow\State
      * @codeCoverageIgnore
      */
     public function getWorkflowState()
@@ -720,19 +722,20 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Sets the associated site
-     * @param  \BackBuilder\NestedNode\Site $site
-     * @return \BackBuilder\NestedNode\Page
+     * @param  \BackBee\NestedNode\Site $site
+     * @return \BackBee\NestedNode\Page
      */
     public function setSite(Site $site = null)
     {
         $this->getSection()->setSite($site);
+
         return $this;
     }
 
     /**
      * Sets the main contentset associated to the node.
-     * @param  \BackBuilder\ClassContent\ContentSet $contentset
-     * @return \BackBuilder\NestedNode\ANestedNode
+     * @param  \BackBee\ClassContent\ContentSet $contentset
+     * @return \BackBee\NestedNode\ANestedNode
      */
     public function setContentset(ContentSet $contentset)
     {
@@ -743,8 +746,8 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Sets the date of the page
-     * @param  \DateTime                    $date
-     * @return \BackBuilder\NestedNode\Page
+     * @param  \DateTime                $date
+     * @return \BackBee\NestedNode\Page
      */
     public function setDate(\DateTime $date = null)
     {
@@ -756,9 +759,9 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
     /**
      * Sets the layout for the page.
      * Adds as much ContentSet to the page main ContentSet than defined zones in layout
-     * @param  \BackBuilder\Site\Layout                $layout
-     * @param  \BackBuilder\ClassContent\AClassContent $toPushInMainZone
-     * @return \BackBuilder\NestedNode\Page
+     * @param  \BackBee\Site\Layout                $layout
+     * @param  \BackBee\ClassContent\AClassContent $toPushInMainZone
+     * @return \BackBee\NestedNode\Page
      */
     public function setLayout(Layout $layout, AClassContent $toPushInMainZone = null)
     {
@@ -784,7 +787,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
                 $contentset = $this->getInheritedContent($i, $contentset);
             } elseif ($zone->defaultClassContent) {
                 // New default content push
-                $contentset->push($this->createNewDefaultContent('BackBuilder\ClassContent\\'.$zone->defaultClassContent, $zone->mainZone));
+                $contentset->push($this->createNewDefaultContent('BackBee\ClassContent\\'.$zone->defaultClassContent, $zone->mainZone));
             }
 
             $this->getContentSet()->push($contentset);
@@ -795,8 +798,8 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Sets the alternate title of the page.
-     * @param  string                       $alttitle
-     * @return \BackBuilder\NestedNode\Page
+     * @param  string                   $alttitle
+     * @return \BackBee\NestedNode\Page
      */
     public function setAltTitle($alttitle)
     {
@@ -807,8 +810,8 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Sets the title of the page.
-     * @param  string                       $title
-     * @return \BackBuilder\NestedNode\Page
+     * @param  string                   $title
+     * @return \BackBee\NestedNode\Page
      */
     public function setTitle($title)
     {
@@ -819,8 +822,8 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Sets the URL of the page
-     * @param  string                       $url
-     * @return \BackBuilder\NestedNode\Page
+     * @param  string                   $url
+     * @return \BackBee\NestedNode\Page
      */
     public function setUrl($url)
     {
@@ -831,8 +834,8 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Sets the target if a permanent redirect is defined
-     * @param  string                       $target
-     * @return \BackBuilder\NestedNode\Page
+     * @param  string                   $target
+     * @return \BackBee\NestedNode\Page
      */
     public function setTarget($target)
     {
@@ -843,8 +846,8 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Sets a permanent redirect
-     * @param  string                       $redirect
-     * @return \BackBuilder\NestedNode\Page
+     * @param  string                   $redirect
+     * @return \BackBee\NestedNode\Page
      */
     public function setRedirect($redirect)
     {
@@ -855,8 +858,8 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Sets the associated metadata
-     * @param  \BackBuilder\MetaData\MetaDataBag $metadata
-     * @return \BackBuilder\NestedNode\Page
+     * @param  \BackBee\MetaData\MetaDataBag $metadata
+     * @return \BackBee\NestedNode\Page
      */
     public function setMetaData(MetaDataBag $metadata = null)
     {
@@ -867,8 +870,8 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Sets the state
-     * @param  int                          $state
-     * @return \BackBuilder\NestedNode\Page
+     * @param  int                      $state
+     * @return \BackBee\NestedNode\Page
      */
     public function setState($state)
     {
@@ -879,8 +882,8 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Sets the publishing date
-     * @param  \DateTime                    $publishing
-     * @return \BackBuilder\NestedNode\Page
+     * @param  \DateTime                $publishing
+     * @return \BackBee\NestedNode\Page
      */
     public function setPublishing($publishing = null)
     {
@@ -891,8 +894,8 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Sets the archiving date
-     * @param  \DateTime                    $archiving
-     * @return \BackBuilder\NestedNode\Page
+     * @param  \DateTime                $archiving
+     * @return \BackBee\NestedNode\Page
      */
     public function setArchiving($archiving = null)
     {
@@ -904,7 +907,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
     /**
      * Sets a collection of revisions for the page
      * @param  \Doctrine\Common\Collections\ArrayCollection $revisions
-     * @return \BackBuilder\NestedNode\Page
+     * @return \BackBee\NestedNode\Page
      */
     public function setRevisions(ArrayCollection $revisions)
     {
@@ -915,8 +918,8 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Sets the workflow state
-     * @param  \BackBuilder\Workflow\State  $state
-     * @return \BackBuilder\NestedNode\Page
+     * @param  \BackBee\Workflow\State  $state
+     * @return \BackBee\NestedNode\Page
      */
     public function setWorkflowState(State $state = null)
     {
@@ -927,8 +930,8 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Returns the inherited zone according to the provided ContentSet
-     * @param  \BackBuilder\ClassContent\ContentSet $contentSet
-     * @return \StdClass|NULL                       The inherited zone if found
+     * @param  \BackBee\ClassContent\ContentSet $contentSet
+     * @return \StdClass|NULL                   The inherited zone if found
      */
     public function getInheritedContensetZoneParams(ContentSet $contentSet)
     {
@@ -957,7 +960,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Returns the index of the provided ContentSet in the main ContentSetif found, FALSE otherwise
-     * @param  \BackBuilder\ClassContent\ContentSet $contentSet
+     * @param  \BackBee\ClassContent\ContentSet $contentSet
      * @return int|FALSE
      */
     public function getRootContentSetPosition(ContentSet $contentSet)
@@ -967,8 +970,8 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Returns the parent ContentSet in the same zone, FALSE if it is not found
-     * @param  \BackBuilder\ClassContent\ContentSet      $contentSet
-     * @return \BackBuilderClassContent\ContentSet|FALSE
+     * @param  \BackBee\ClassContent\ContentSet      $contentSet
+     * @return \BackBeeClassContent\ContentSet|FALSE
      */
     public function getParentZoneAtSamePositionIfExists(ContentSet $contentSet)
     {
@@ -1051,7 +1054,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Is the ContentSet is linked to his parent
-     * @param  \BackBuilder\ClassContent\ContentSet $contentset
+     * @param  \BackBee\ClassContent\ContentSet $contentset
      * @return Boolean
      */
     public function isLinkedToHisParentBy(ContentSet $contentset = null)
@@ -1068,10 +1071,10 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Replaces the ContentSet of the page
-     * @param  \BackBuilder\ClassContent\ContentSet $contentToReplace
-     * @param  \BackBuilder\ClassContent\ContentSet $newContentSet
-     * @param  Boolean                              $checkContentsLinkToParent
-     * @return \BackBuilder\ClassContent\ContentSet
+     * @param  \BackBee\ClassContent\ContentSet $contentToReplace
+     * @param  \BackBee\ClassContent\ContentSet $newContentSet
+     * @param  Boolean                          $checkContentsLinkToParent
+     * @return \BackBee\ClassContent\ContentSet
      */
     public function replaceRootContentSet(ContentSet $contentToReplace, ContentSet $newContentSet, $checkContentsLinkToParent = true)
     {
@@ -1094,7 +1097,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
     public function toArray()
     {
         return array(
-            'id' => 'node_' . $this->getUid(),
+            'id' => 'node_'.$this->getUid(),
             'rel' => (true === $this->isLeaf()) ? 'leaf' : 'folder',
             'uid' => $this->getUid(),
             'rootuid' => $this->getRoot()->getUid(),
@@ -1115,7 +1118,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
             'metadata' => (null !== $this->getMetaData()) ? $this->getMetaData()->toArray() : null,
             'layout_uid' => (null !== $this->getLayout()) ? $this->getLayout()->getUid() : null,
             'workflow_state' => (null !== $this->getWorkflowState()) ? $this->getWorkflowState()->getCode() : null,
-            'section' => $this->hasMainSection()
+            'section' => $this->hasMainSection(),
         );
     }
 
@@ -1136,9 +1139,9 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Constructs the page from a string or object
-     * @param mixed $serialized The string representation of the object.
-     * @return \BackBuilder\NestedNode\Page
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the serialized data can not be decode
+     * @param  mixed                                       $serialized The string representation of the object.
+     * @return \BackBee\NestedNode\Page
+     * @throws \BackBee\Exception\InvalidArgumentException Occurs if the serialized data can not be decode
      */
     public function unserialize($serialized)
     {
@@ -1149,10 +1152,10 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
         }
 
         foreach (get_object_vars($serialized) as $property => $value) {
-            $property = '_' . $property;
+            $property = '_'.$property;
             if (true === in_array($property, $this->_unserialized_ignored)) {
                 continue;
-            } else if (true === property_exists($this, $property)) {
+            } elseif (true === property_exists($this, $property)) {
                 $this->$property = $value;
             }
         }
@@ -1213,7 +1216,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
         if (false === $this->hasMainSection()) {
             return array();
         }
-        
+
         return $this->getSection()->getPages();
     }
 
@@ -1235,8 +1238,8 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Returns an array of the ascendants
-     * @param  \BackBuilder\NestedNode\Page $page
-     * @param  array                        $breadcrumb
+     * @param  \BackBee\NestedNode\Page $page
+     * @param  array                    $breadcrumb
      * @return array
      * @deprecated
      */
@@ -1281,7 +1284,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * old_state property setter
-     * @return \BackBuilder\NestedNode\Page
+     * @return \BackBee\NestedNode\Page
      */
     public function setOldState($v)
     {
@@ -1292,8 +1295,8 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Tells whether getUrl() should return the redirect url or BB5 url
-     * @param  bool                         $useUrlRedirect
-     * @return \BackBuilder\NestedNode\Page
+     * @param  bool                     $useUrlRedirect
+     * @return \BackBee\NestedNode\Page
      */
     public function setUseUrlRedirect($useUrlRedirect)
     {
@@ -1318,7 +1321,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
      */
     public function getTemplateName()
     {
-        return str_replace(array("BackBuilder".NAMESPACE_SEPARATOR."NestedNode".NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR), array("", DIRECTORY_SEPARATOR), get_class($this));
+        return str_replace(array("BackBee".NAMESPACE_SEPARATOR."NestedNode".NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR), array("", DIRECTORY_SEPARATOR), get_class($this));
     }
 
     /**
@@ -1445,9 +1448,9 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Assign DateTime object to a property giving a time stamp
-     * @param  string                       $property
-     * @param  int                          $timestamp
-     * @return \BackBuilder\NestedNode\Page
+     * @param  string                   $property
+     * @param  int                      $timestamp
+     * @return \BackBee\NestedNode\Page
      */
     private function setDateTimeValue($property, $timestamp = null)
     {
@@ -1464,9 +1467,9 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Returns the inherited content from parent, $default if not found
-     * @param  int                                     $index
-     * @param  \BackBuilder\ClassContent\AClassContent $default
-     * @return \BackBuilder\ClassContent\AClassContent
+     * @param  int                                 $index
+     * @param  \BackBee\ClassContent\AClassContent $default
+     * @return \BackBee\ClassContent\AClassContent
      */
     private function getInheritedContent($index, AClassContent $default)
     {
@@ -1483,9 +1486,9 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Creates a new default content to be pushed in layout columns
-     * @param  string                                  $classname
-     * @param  boolean                                 $mainzone
-     * @return \BackBuilder\ClassContent\AClassContent
+     * @param  string                              $classname
+     * @param  boolean                             $mainzone
+     * @return \BackBee\ClassContent\AClassContent
      */
     private function createNewDefaultContent($classname, $mainzone = false)
     {
@@ -1536,9 +1539,9 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Sets the level.
-     * @param int $level
-     * @return \BackBuilder\NestedNode\Page
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the value can not be cast to positive integer
+     * @param  int                                         $level
+     * @return \BackBee\NestedNode\Page
+     * @throws \BackBee\Exception\InvalidArgumentException Occurs if the value can not be cast to positive integer
      */
     public function setLevel($level)
     {
@@ -1547,6 +1550,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
         }
 
         $this->_level = $level;
+
         return $this;
     }
 
@@ -1562,9 +1566,9 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Sets the position.
-     * @param int $position
-     * @return \BackBuilder\NestedNode\Page
-     * @throws \BackBuilder\Exception\InvalidArgumentException Occurs if the value can not be cast to positive integer
+     * @param  int                                         $position
+     * @return \BackBee\NestedNode\Page
+     * @throws \BackBee\Exception\InvalidArgumentException Occurs if the value can not be cast to positive integer
      */
     public function setPosition($position)
     {
@@ -1573,6 +1577,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
         }
 
         $this->_position = $position;
+
         return $this;
     }
 
@@ -1598,12 +1603,13 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Sets the date modified
-     * @param \Datetime $modified
-     * @return \BackBuilder\NestedNode\Page
+     * @param  \Datetime                $modified
+     * @return \BackBee\NestedNode\Page
      */
     public function setModified(\Datetime $modified)
     {
         $this->_modified = $modified;
+
         return $this;
     }
 
@@ -1618,7 +1624,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Return the associated main section if exists, NULL otherwise
-     * @return \BackBuilder\NestedNode\Section|NULL
+     * @return \BackBee\NestedNode\Section|NULL
      * @codeCoverageIgnore
      */
     public function getMainSection()
@@ -1628,8 +1634,8 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Sets the main section for this page
-     * @param \BackBuilder\NestedNode\Section $section
-     * @return \BackBuilder\NestedNode\Page
+     * @param  \BackBee\NestedNode\Section $section
+     * @return \BackBee\NestedNode\Page
      */
     public function setMainSection(Section $section)
     {
@@ -1647,27 +1653,28 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Sets the section for this page
-     * @param \BackBuilder\NestedNode\Section $section
-     * @return \BackBuilder\NestedNode\Page
+     * @param  \BackBee\NestedNode\Section $section
+     * @return \BackBee\NestedNode\Page
      */
     public function setSection(Section $section)
     {
         if ($section !== $this->_mainsection) {
             $this->_mainsection = null;
             $this->_level = $section->getLevel() + 1;
-            
+
             if (0 === $this->_position) {
                 $this->_position = 1;
             }
         }
 
         $this->_section = $section;
+
         return $this;
     }
 
     /**
      * Returns the section of this page
-     * @return \BackBuilder\NestedNode\Section
+     * @return \BackBee\NestedNode\Section
      */
     public function getSection()
     {
@@ -1689,24 +1696,24 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Is this page is an ancestor of the provided one ?
-     * @param \BackBuilder\NestedNode\Page  $page
-     * @param Boolean                       $strict Optional, if TRUE (default) this page is excluded of ancestors list
-     * @return Boolean                      TRUE if this page is an anscestor of provided page, FALSE otherwise
+     * @param  \BackBee\NestedNode\Page $page
+     * @param  Boolean                  $strict Optional, if TRUE (default) this page is excluded of ancestors list
+     * @return Boolean                  TRUE if this page is an anscestor of provided page, FALSE otherwise
      */
     public function isAncestorOf(Page $page, $strict = true)
     {
         if (false === $this->hasMainSection()) {
             return ($this === $page && false === $strict);
         }
-        
+
         return $this->getSection()->isAncestorOf($page->getSection(), $strict) || $page->getParent() === $this;
     }
 
     /**
      * Is this page is a descendant of the provided one ?
-     * @param \BackBuilder\NestedNode\Page  $page
-     * @param Boolean                       $strict Optional, if TRUE (default) this page is excluded of descendants list
-     * @return Boolean                      TRUE if this page is a descendant of provided page, FALSE otherwise
+     * @param  \BackBee\NestedNode\Page $page
+     * @param  Boolean                  $strict Optional, if TRUE (default) this page is excluded of descendants list
+     * @return Boolean                  TRUE if this page is a descendant of provided page, FALSE otherwise
      */
     public function isDescendantOf(Page $page, $strict = true)
     {
@@ -1723,7 +1730,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Returns the root page.
-     * @return \BackBuilder\NestedNode\Page
+     * @return \BackBee\NestedNode\Page
      */
     public function getRoot()
     {
@@ -1741,8 +1748,8 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Sets the parent node.
-     * @param \BackBuilder\NestedNode\Page $parent
-     * @return \BackBuilder\NestedNode\Page
+     * @param  \BackBee\NestedNode\Page $parent
+     * @return \BackBee\NestedNode\Page
      */
     public function setParent(Page $parent)
     {
@@ -1761,7 +1768,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Returns the parent page, NULL if this page is root
-     * @return \BackBuilder\NestedNode\Page|NULL
+     * @return \BackBee\NestedNode\Page|NULL
      */
     public function getParent()
     {
@@ -1800,5 +1807,4 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
     {
         return $this->getSection()->hasChildren();
     }
-
 }
