@@ -428,7 +428,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
 
     /**
      * Returns the owner site of this node.
-     * @return \Backbuilder\Site\Site
+     * @return \BackBee\Site\Site
      * @codeCoverageIgnore
      */
     public function getSite()
