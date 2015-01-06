@@ -26,8 +26,8 @@ namespace BackBee\NestedNode\Repository;
 use Doctrine\ORM\NoResultException;
 
 use BackBee\Site\Site;
-use BackBee\Util\Arrays;
 use BackBee\Util\Buffer;
+use BackBee\Utils\Collection\Collection;
 
 /**
  * Section repository
@@ -153,7 +153,7 @@ class SectionRepository extends NestedNodeRepository
                 ->executeQuery($query, array($node_uid), array(\Doctrine\DBAL\Types\Type::STRING))
                 ->fetchAll();
 
-        return Arrays::array_column($result, 'uid0');
+        return Collection::array_column($result, 'uid0');
     }
 
     /**
