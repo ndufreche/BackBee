@@ -35,7 +35,7 @@ use BackBee\Renderer\IRenderable;
 use BackBee\Security\Acl\Domain\AObjectIdentifiable;
 use BackBee\Site\Layout;
 use BackBee\Site\Site;
-use BackBee\Util\Numeric;
+use BackBee\Utils\Numeric;
 use BackBee\Workflow\State;
 
 /**
