@@ -159,7 +159,7 @@ class Page extends AObjectIdentifiable implements IRenderable, DomainObjectInter
     /**
      * The URI of this page
      * @var string
-     * @Column(type="string", name="url", nullable=false)
+     * @Column(type="string", name="url", nullable=true)
      *
      * @Serializer\Expose
      * @Serializer\Type("string")
