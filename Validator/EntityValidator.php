@@ -82,7 +82,7 @@ class EntityValidator extends AValidator
                 }
 
                 if (true === $do_treatment) {
-                    if (true === isset($cConfig[self::CONFIG_PARAMETER_VALIDATOR])) {
+                    if (true === isset($cConfig[self::CONFIG_PARAMETER_VALIDATOR]) && false === empty($data)) {
                         foreach ($cConfig[self::CONFIG_PARAMETER_VALIDATOR] as $validator => $validator_conf) {
                             if (self::UNIQUE_VALIDATOR === $validator) {
                                 $this->doUniqueValidator($entity, $errors, $key, $data, $validator_conf);

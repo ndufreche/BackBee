@@ -57,7 +57,7 @@ class ArrayValidator extends AValidator
                 }
 
                 if (true === $do_treatment) {
-                    if (true === isset($cConfig[self::CONFIG_PARAMETER_VALIDATOR])) {
+                    if (true === isset($cConfig[self::CONFIG_PARAMETER_VALIDATOR]) && false === empty($data)) {
                         foreach ($cConfig[self::CONFIG_PARAMETER_VALIDATOR] as $validator => $validator_conf) {
                             $this->doGeneralValidator($data, $key, $validator, $validator_conf, $errors);
                         }
