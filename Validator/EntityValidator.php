@@ -1,24 +1,22 @@
 <?php
 
 /*
- * Copyright (c) 2011-2015 Lp digital system
+ * Copyright (c) 2011-2013 Lp digital system
  *
- * This file is part of BackBee.
+ * This file is part of BackBuilder5.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBuilder5 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBee is distributed in the hope that it will be useful,
+ * BackBuilder5 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBee. If not, see <http://www.gnu.org/licenses/>.
- *
- * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
+ * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace BackBee\Validator;
@@ -28,8 +26,8 @@ use Doctrine\ORM\EntityManager;
 /**
  * Entity's validator
  *
- * @category    BackBee
- * @package     BackBee\Validator
+ * @category    BackBuilder
+ * @package     BackBuilder\Validator
  * @copyright   Lp digital system
  * @author      f.kroockmann <florian.kroockmann@lp-digital.fr>
  */
@@ -69,27 +67,37 @@ class EntityValidator extends AValidator
         if (false === empty($prefix)) {
             $datas = $this->deleteElementWhenPrefix($datas, $prefix);
         }
-
+        
         foreach ($datas as $key => $data) {
             if (true === isset($config[$key])) {
                 $cConfig = $config[$key];
-
+                
+                $set_empty = isset($cConfig[self::CONFIG_PARAMETER_SET_EMPTY]) && true === $cConfig[self::CONFIG_PARAMETER_SET_EMPTY];
+                
                 $do_treatment = true;
-                if (true === isset($cConfig[self::CONFIG_PARAMETER_MANDATORY]) &&
-                    false === $cConfig[self::CONFIG_PARAMETER_MANDATORY] &&
-                    true === empty($data)) {
-                    $do_treatment = false;
+                if (isset($cConfig[self::CONFIG_PARAMETER_MANDATORY])) {
+                    if (false === $cConfig[self::CONFIG_PARAMETER_MANDATORY] && (true === empty($data) && false === $set_empty)) {
+                        $do_treatment = false;
+                    }
                 }
-
+                
                 if (true === $do_treatment) {
-                    if (true === isset($cConfig[self::CONFIG_PARAMETER_VALIDATOR]) && false === empty($data)) {
-                        foreach ($cConfig[self::CONFIG_PARAMETER_VALIDATOR] as $validator => $validator_conf) {
-                            if (self::UNIQUE_VALIDATOR === $validator) {
-                                $this->doUniqueValidator($entity, $errors, $key, $data, $validator_conf);
-                            } elseif (self::PASSWORD_VALIDATOR === $validator) {
-                                $this->doPasswordValidator($errors, $key, $data, $datas, $validator_conf);
-                            } else {
-                                $this->doGeneralValidator($data, $key, $validator, $validator_conf, $errors);
+                    if (true === isset($cConfig[self::CONFIG_PARAMETER_VALIDATOR])) {
+                        
+                        $do_treatment = true;
+                        if (true === empty($data) && true === $set_empty) {
+                            $do_treatment = false;
+                        }
+                        
+                        if (true === $do_treatment) {
+                            foreach ($cConfig[self::CONFIG_PARAMETER_VALIDATOR] as $validator => $validator_conf) {
+                                if (self::UNIQUE_VALIDATOR === $validator) {
+                                    $this->doUniqueValidator($entity, $errors, $key, $data, $validator_conf);
+                                } elseif (self::PASSWORD_VALIDATOR === $validator) {
+                                    $this->doPasswordValidator($errors, $key, $data, $datas, $validator_conf);
+                                } else {
+                                    $this->doGeneralValidator($data, $key, $validator, $validator_conf, $errors);
+                                }
                             }
                         }
                     }
@@ -97,17 +105,18 @@ class EntityValidator extends AValidator
                     if (false === empty($prefix)) {
                         $key = str_replace($prefix, '', $key);
                     }
+                    
                     if (true === method_exists($entity, 'set'.ucfirst($key))) {
                         $do_set = true;
-                        if (true === isset($cConfig[self::CONFIG_PARAMETER_SET_EMPTY])) {
-                            if (false === $cConfig[self::CONFIG_PARAMETER_SET_EMPTY] && true === empty($data)) {
-                                $do_set = false;
-                            }
+                        if (false === $set_empty && true === empty($data)) {
+                            $do_set = false;
                         }
+                        
                         if (true === $do_set) {
                             if (true === isset($cConfig[self::CONFIG_PARAMETER_ENTITY])) {
                                 $data = $this->em->find($cConfig[self::CONFIG_PARAMETER_ENTITY], $data);
                             }
+                            
                             $entity->{'set'.ucfirst($key)}($data);
                         }
                     }
