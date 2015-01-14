@@ -50,11 +50,13 @@ class ArrayValidator extends AValidator
         foreach ($datas as $key => $data) {
             if (null !== $cConfig = $this->getData($key, $form_config)) {
                 
-                $set_empty = isset($cConfig[self::CONFIG_PARAMETER_SET_EMPTY]) && true === $cConfig[self::CONFIG_PARAMETER_SET_EMPTY];
+                if ($set_empty = isset($cConfig[self::CONFIG_PARAMETER_SET_EMPTY])) {
+                    $set_empty =  true === $cConfig[self::CONFIG_PARAMETER_SET_EMPTY];
+                }
                 
                 $do_treatment = true;
                 if (isset($cConfig[self::CONFIG_PARAMETER_MANDATORY])) {
-                    if (false === $cConfig[self::CONFIG_PARAMETER_MANDATORY] && (true === empty($data) && false === $set_empty)) {
+                    if (false === $cConfig[self::CONFIG_PARAMETER_MANDATORY] && empty($data && !$set_empty)) {
                         $do_treatment = false;
                     }
                 }

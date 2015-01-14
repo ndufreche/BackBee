@@ -1,22 +1,22 @@
 <?php
 
 /*
- * Copyright (c) 2011-2013 Lp digital system
+ * Copyright (c) 2011-2015 Lp digital system
  *
- * This file is part of BackBuilder5.
+ * This file is part of BackBee.
  *
- * BackBuilder5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * BackBuilder5 is distributed in the hope that it will be useful,
+ * BackBee is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
+ * along with BackBee. If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace BackBee\Validator;
@@ -26,8 +26,8 @@ use Doctrine\ORM\EntityManager;
 /**
  * Entity's validator
  *
- * @category    BackBuilder
- * @package     BackBuilder\Validator
+ * @category    BackBee
+ * @package     BackBee\Validator
  * @copyright   Lp digital system
  * @author      f.kroockmann <florian.kroockmann@lp-digital.fr>
  */
@@ -72,11 +72,13 @@ class EntityValidator extends AValidator
             if (true === isset($config[$key])) {
                 $cConfig = $config[$key];
                 
-                $set_empty = isset($cConfig[self::CONFIG_PARAMETER_SET_EMPTY]) && true === $cConfig[self::CONFIG_PARAMETER_SET_EMPTY];
+                if ($set_empty = isset($cConfig[self::CONFIG_PARAMETER_SET_EMPTY])) {
+                    $set_empty =  true === $cConfig[self::CONFIG_PARAMETER_SET_EMPTY];
+                }
                 
                 $do_treatment = true;
                 if (isset($cConfig[self::CONFIG_PARAMETER_MANDATORY])) {
-                    if (false === $cConfig[self::CONFIG_PARAMETER_MANDATORY] && (true === empty($data) && false === $set_empty)) {
+                    if (false === $cConfig[self::CONFIG_PARAMETER_MANDATORY] && empty($data && !$set_empty)) {
                         $do_treatment = false;
                     }
                 }
