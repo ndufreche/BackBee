@@ -78,7 +78,7 @@ class EntityValidator extends AValidator
                 
                 $do_treatment = true;
                 if (isset($cConfig[self::CONFIG_PARAMETER_MANDATORY])) {
-                    if (false === $cConfig[self::CONFIG_PARAMETER_MANDATORY] && empty($data && !$set_empty)) {
+                    if (false === $cConfig[self::CONFIG_PARAMETER_MANDATORY] && empty($data) && !$set_empty) {
                         $do_treatment = false;
                     }
                 }
