@@ -1,12 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title><?php echo $this->getCurrentSite()->getLabel(); ?></title>
-    <meta charset="utf-8">
-    <link rel="stylesheet" href="<?php echo $this->getResourceUrl('css/style_reset.css'); ?>">
+{{ this.partial('partials/header-head.twig')|raw }}
+{{ this.addStylesheet(this.getResourceUrl('css/style_reset.css')) }}
 </head>
 <body>
-
     <!-- BB5 SITE WRAPPER -->
     <div id="bb5-site-wrapper">
         <!-- BEGIN bodywrapper: .container -->
@@ -17,8 +15,8 @@
                     <section role="main" class="section">
                         <h1>Une erreur est survenue&hellip;</h1>
                         <div class="announcement-wrapper">
-                            <p><?php echo $this->error_message; ?></p>
-                            <?php echo $this->error_trace; ?>
+                            <p>{{ this.error_message }}</p>
+                            {{ this.error_trace }}
                         </div>
                         <hr>
                         <div class="announcement-box">
