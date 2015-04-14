@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Erreur 500</title>
-    <meta charset="utf-8">
-    <link rel="stylesheet" href="<?php echo $this->getResourceUrl('css/style_reset.css'); ?>">
+{{ this.partial('partials/header-head.twig')|raw }}
+{{ this.addStylesheet(this.getResourceUrl('css/style_reset.css')) }}
 </head>
 <body>
     <!-- BB5 SITE WRAPPER -->
@@ -16,7 +15,8 @@
                     <section role="main" class="section">
                         <h1>Une erreur est survenue&hellip;</h1>
                         <div class="announcement-wrapper">
-                            <p>Contactez l'administrateur de ce site.</p>
+                            <p>{{ this.error_message }}</p>
+                            {{ this.error_trace }}
                         </div>
                         <hr>
                         <div class="announcement-box">
