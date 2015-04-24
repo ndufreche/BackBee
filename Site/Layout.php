@@ -747,11 +747,12 @@ class Layout extends AbstractObjectIdentifiable
                 );
             }
         }
+        $translator = $this->getApplication()->getContainer()->get('translator');
 
         $workflowStates = array_merge(
-            array('0' => array('label' => 'Hors ligne', 'code' => '0')),
+            array('0' => array('label' => $translator->trans('offline'), 'code' => '0')),
             $workflowStates['offline'],
-            array('1' => array('label' => 'En ligne', 'code' => '1')),
+            array('1' => array('label' => $translator->trans('online'), 'code' => '1')),
             $workflowStates['online']
         );
 
