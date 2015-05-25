@@ -23,15 +23,17 @@
 
 namespace BackBee\Rest\Tests\Controller;
 
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
-use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 use BackBee\Rest\Controller\UserController;
+use BackBee\Rest\Patcher\OperationBuilder;
 use BackBee\Rest\Test\RestTestCase;
 use BackBee\Security\Acl\Permission\MaskBuilder;
 use BackBee\Security\Group;
 use BackBee\Security\Token\BBUserToken;
 use BackBee\Security\User;
+
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
+use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 
 /**
  * Test for UserController class.
@@ -57,13 +59,13 @@ class UserControllerTest extends RestTestCase
         $this->getBBApp()->setIsStarted(true);
 
         // save user
-        $group = new Group();
-        $group->setName('groupName');
-        $bbapp->getEntityManager()->persist($group);
+        $this->group = new Group();
+        $this->group->setName('groupName');
+        $bbapp->getEntityManager()->persist($this->group);
 
         // valid user
         $this->user = new User();
-        $this->user->addGroup($group);
+        $this->user->addGroup($this->group);
         $this->user->setLogin('user123');
         $this->user->setEmail('user123@provider.com');
         $this->user->setPassword('password123');
@@ -72,7 +74,7 @@ class UserControllerTest extends RestTestCase
 
         // inactive user
         $user = new User();
-        $user->addGroup($group);
+        $user->addGroup($this->group);
         $user->setLogin('user123inactive');
         $user->setEmail('user123inactive@provider.com');
         $user->setPassword('password123');
@@ -434,6 +436,125 @@ class UserControllerTest extends RestTestCase
             'activated' => false,
             'password' => 'password',
         ]));
+    }
+
+    /**
+     * @covers ::postAction
+     * @expectedException \Symfony\Component\HttpKernel\Exception\ConflictHttpException
+     * @expectedExceptionMessage User with that login already exists: usernameDuplicate
+     */
+    public function testPatchAction()
+    {
+        // set up permissions
+        $aclManager = $this->getBBApp()->getContainer()->get('security.acl_manager');
+        $aclManager->insertOrUpdateClassAce(new ObjectIdentity('all', get_class($this->user)), UserSecurityIdentity::fromAccount($this->user), MaskBuilder::MASK_CREATE);
+        $controller = $this->getController();
+
+        // create user
+        $user = new User();
+        $user->setLogin('usernamePatchable')
+            ->setEmail('usernamePatchable@provider.com')
+            ->setPassword('password123')
+            ->setApiKeyEnabled(false)
+            ->setApiKeyPrivate('PRIVATE_KEY')
+            ->setApiKeyPublic('PUBLIC_KEY')
+            ->setFirstname('FirstName')
+            ->setLastname('LastName')
+            ->setState(User::PASSWORD_PICKED)
+            ->setActivated(false);
+        $this->getBBApp()->getEntityManager()->persist($user);
+        $this->getBBApp()->getEntityManager()->flush();
+
+        $url = '/rest/1/user/' . $user->getId();
+
+        /**
+         * Patch not existant
+         */
+        $response = $this->sendRequest(self::requestPatch(
+            $url,
+            (new OperationBuilder())
+                ->replace('inexistantPath', true)
+                ->getOperations(),
+            'application/json',
+            true
+        ));
+
+        $this->assertEquals(404, $response->getStatusCode());
+
+        /**
+         * Patch status
+         */
+        $response = $this->sendRequest(self::requestPatch(
+            $url,
+            (new OperationBuilder())
+                ->replace('activated', true)
+                ->getOperations(),
+            'application/json',
+            true
+        ));
+
+        $this->assertEquals(204, $response->getStatusCode());
+        $this->getBBApp()->getEntityManager()->refresh($user);
+        $this->assertTrue($user->isActivated());
+
+        /**
+         * Patch Entity
+         */
+        $newEmail = 'uemailPatched@provider.com';
+        $response = $this->sendRequest(self::requestPatch(
+            $url,
+            (new OperationBuilder())
+                ->replace('email', $newEmail)
+                ->getOperations(),
+            'application/json',
+            true
+        ));
+
+        $this->assertEquals(204, $response->getStatusCode());
+        $this->getBBApp()->getEntityManager()->refresh($user);
+        $this->assertEquals($newEmail, $user->getEmail());
+
+        $response = $this->sendRequest(self::requestPatch(
+            $url,
+            (new OperationBuilder())
+                ->replace('email', 'wrongEmail')
+                ->getOperations(),
+            'application/json',
+            true
+        ));
+        $this->assertEquals(500, $response->getStatusCode());
+
+        /**
+         * Patch add Group
+         */
+        $response = $this->sendRequest(self::requestPatch(
+            $url,
+            (new OperationBuilder())
+                ->replace('group', [$this->group->getId() => 'added'])
+                ->getOperations(),
+            'application/json',
+            true
+        ));
+
+        $this->assertEquals(204, $response->getStatusCode());
+        $this->getBBApp()->getEntityManager()->refresh($user);
+        $this->assertEquals(1, count($user->getGroups()));
+
+        /**
+         * Patch remove Group
+         */
+        $response = $this->sendRequest(self::requestPatch(
+            $url,
+            (new OperationBuilder())
+                ->replace('group', [$this->group->getId() => 'removed'])
+                ->getOperations(),
+            'application/json',
+            true
+        ));
+
+        $this->assertEquals(204, $response->getStatusCode());
+        $this->getBBApp()->getEntityManager()->refresh($user);
+        $this->assertEquals(0, count($user->getGroups()));
     }
 
     protected function tearDown()
