@@ -82,7 +82,15 @@ abstract class AbstractAdminBundleController extends AbstractBundleController
      */
     public function render($template, array $parameters = null, Response $response = null)
     {
-        return parent::render($this->bundle->getBaseDirectory().DIRECTORY_SEPARATOR.'Templates'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.$template, $parameters, $response);
+        $bundleAdminHelper = new \BackBee\Bundle\BundleAdminHelper($this->application->getRenderer());
+        $parameters = (array)$parameters;
+        $parameters['bundleAdmin'] = $bundleAdminHelper;
+
+        return parent::render(
+            $this->bundle->getBaseDirectory().DIRECTORY_SEPARATOR.'Templates'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.$template,
+            $parameters,
+            $response
+        );
     }
 
     /**
@@ -93,6 +101,19 @@ abstract class AbstractAdminBundleController extends AbstractBundleController
     public function notifyUser($type, $message)
     {
         $this->notifications[] = ['type' => $type, 'message' => $message];
+    }
+
+    public function saveUploadedFile($fieldName, Request $request)
+    {
+
+
+        if (null !== $this->_application &&
+                null !== $this->_application->getEventDispatcher()) {
+            $event = new \BackBee\Event\PostUploadEvent($sourcefile, $targetfile);
+            $this->_application->getEventDispatcher()->dispatch('file.postupload', $event);
+        }
+
+        return $finalPath;
     }
 
     /**
