@@ -25,6 +25,12 @@ namespace BackBee\Bundle;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Request;
+
+use BackBee\Bundle\BundleAdminHelper;
+use BackBee\Event\PostUploadEvent;
+use BackBee\Exception\BBException;
+use BackBee\Util\Media;
 
 /**
  * @author Eric Chau <eric.chau@lp-digital.fr>
@@ -82,7 +88,7 @@ abstract class AbstractAdminBundleController extends AbstractBundleController
      */
     public function render($template, array $parameters = null, Response $response = null)
     {
-        $bundleAdminHelper = new \BackBee\Bundle\BundleAdminHelper($this->application->getRenderer());
+        $bundleAdminHelper = new BundleAdminHelper($this->application->getRenderer());
         $parameters = (array)$parameters;
         $parameters['bundleAdmin'] = $bundleAdminHelper;
 
@@ -103,20 +109,32 @@ abstract class AbstractAdminBundleController extends AbstractBundleController
         $this->notifications[] = ['type' => $type, 'message' => $message];
     }
 
-    public function saveUploadedFile($fieldName, Request $request)
+
+    public function moveUploadedFile(Request $request, $inputName)
     {
+        $originaleName = $request->request->get(sprintf(BundleAdminHelper::UPLOAD_ORIGINAL_NAME_PATTERN, $name));
+        $filePath = $request->request->get(sprintf(BundleAdminHelper::UPLOAD_PATH_PATTERN, $name));
+        $fileName = $request->request->get(sprintf(BundleAdminHelper::UPLOAD_FILE_NAME_PATTERN, $name));
 
+        $finalPath = Media::getPathFromFilename($fileName, $originaleName, 3, true);
+        var_dump($originaleName, $filePath, $fileName, $finalPath);die;
+        try {
+            File::move($filePath, $finalPath);
 
-        if (null !== $this->_application &&
-                null !== $this->_application->getEventDispatcher()) {
-            $event = new \BackBee\Event\PostUploadEvent($sourcefile, $targetfile);
-            $this->_application->getEventDispatcher()->dispatch('file.postupload', $event);
+            if (null !== $this->getApplication() &&
+                    null !== $this->getApplication()->getEventDispatcher()) {
+                $event = new PostUploadEvent($filePath, $finalPath);
+                $this->getApplication()->getEventDispatcher()->dispatch('file.postupload', $event);
+            }
+        } catch (BBException $e) {
+            $this->getApplication()->getLogging()->error($e->getmessage());
+            return false;
         }
 
         return $finalPath;
     }
 
-    /**
+    /**c'
      * @inherited
      */
     protected function decorateResponse($response, $method)

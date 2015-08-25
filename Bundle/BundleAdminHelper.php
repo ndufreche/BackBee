@@ -31,6 +31,10 @@ use BackBee\Renderer\Renderer;
  */
 class BundleAdminHelper
 {
+    const UPLOAD_ORIGINAL_NAME_PATTERN = '%s-original-name';
+    const UPLOAD_PATH_PATTERN = '%s-path';
+    const UPLOAD_FILE_NAME_PATTERN = '%s';
+
     /**
      * @var \BackBee\Renderer\Renderer
      */
@@ -60,9 +64,9 @@ class BundleAdminHelper
     public function fileUpload($name)
     {
         return '<input name="'.md5($name).'" data-file-upload="'.$name.'" type="file"'.$input.'>'.
-            '<input id="'.$name.'-original-name" name="'.$name.'-original-name" type="hidden" value="">'.
-            '<input id="'.$name.'-path" name="'.$name.'-path" type="hidden" value="">'.
-            '<input id="'.$name.'" name="'.$name.'" type="hidden" value="">';
+            '<input id="'.sprintf(self::UPLOAD_ORIGINAL_NAME_PATTERN, $name).'" name="'.sprintf(self::UPLOAD_ORIGINAL_NAME_PATTERN, $name).'" type="hidden" value="">'.
+            '<input id="'.sprintf(self::UPLOAD_PATH_PATTERN, $name).'" name="'.sprintf(self::UPLOAD_PATH_PATTERN, $name).'" type="hidden" value="">'.
+            '<input id="'.sprintf(self::UPLOAD_FILE_NAME_PATTERN, $name).'" name="'.sprintf(self::UPLOAD_FILE_PATTERN, $name).'" type="hidden" value="">';
     }
 
 }

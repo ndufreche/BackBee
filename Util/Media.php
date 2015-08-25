@@ -54,20 +54,11 @@ class Media
             throw new InvalidArgumentException('Enable to compute path, the provided element file is not yet initialized');
         }
 
-        $folder = '';
         $filename = $content->getUid();
         if (null !== $draft = $content->getDraft()) {
             $filename = $draft->getUid();
         }
-
-        if (0 < $folder_size && strlen($filename) > $folder_size) {
-            $folder = substr($filename, 0, $folder_size).'/';
-            $filename = substr($filename, $folder_size);
-        }
-
-        $extension = File::getExtension($content->originalname, true);
-
-        return $folder.$filename.$extension;
+        return self::getPathFromFilename($filename, $content->originalname, $folder_size);
     }
 
     /**
@@ -88,6 +79,21 @@ class Media
             throw new InvalidArgumentException('Enable to compute path, the provided uid is not a valid string');
         }
 
+        return  self::getPathFromFilename($uid, $originalname, $folder_size, $include_originalname)
+    }
+
+    /**
+     * Returns the computed storage filename of an element file.
+     *
+     * @param \BackBee\ClassContent\Element\File $content
+     * @param int                                $folder_size Optional, size in characters of the storing folder
+     *
+     * @return string
+     *
+     * @throws \BackBee\Exception\InvalidArgumentException Occurs if the provided element file is empty
+     */
+    public static function getPathFromFilename($filename, $originalname, $folder_size = 3, $include_originalname = false)
+    {
         $folder = '';
         $filename = $uid;
         if (0 < $folder_size && strlen($uid) > $folder_size) {
@@ -96,7 +102,7 @@ class Media
         }
 
         if (true === $include_originalname) {
-            $filename .= DIRECTORY_SEPARATOR.$include_originalname;
+            $filename .= DIRECTORY_SEPARATOR.$originalname;
         } else {
             $extension = File::getExtension($originalname, true);
             $filename .= $extension;

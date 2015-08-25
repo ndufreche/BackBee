@@ -28,6 +28,8 @@ use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\Element\File as ElementFile;
 use BackBee\ClassContent\Exception\ClassContentException;
 use BackBee\ClassContent\Repository\ClassContentRepository;
+use BackBee\Event\PostUploadEvent;
+use BackBee\Exception\BBException;
 use BackBee\Util\Media;
 use BackBee\Utils\File\File;
 
@@ -104,7 +106,7 @@ class FileRepository extends ClassContentRepository
      * @param  string                                                $newfilename
      * @param  string                                                $originalname
      *
-     * @return boolean|string
+     * @return string                                                final path storage
      * @throws \BackBee\ClassContent\Exception\ClassContentException Occures on invalid content type provided
      */
     public function updateFile(AbstractClassContent $file, $newfilename, $originalname = null, $src = null)
@@ -142,7 +144,8 @@ class FileRepository extends ClassContentRepository
             }
 
             $this->_dispatchPostUploadEvent($moveto, $file->path);
-        } catch (\BackBee\Exception\BBException $e) {
+        } catch (BBException $e) {
+            $this->getApplication()->getLogging()->error($e->getmessage());
             return false;
         }
 
@@ -272,7 +275,7 @@ class FileRepository extends ClassContentRepository
     {
         if (null !== $this->_application &&
                 null !== $this->_application->getEventDispatcher()) {
-            $event = new \BackBee\Event\PostUploadEvent($sourcefile, $targetfile);
+            $event = new PostUploadEvent($sourcefile, $targetfile);
             $this->_application->getEventDispatcher()->dispatch('file.postupload', $event);
         }
     }
