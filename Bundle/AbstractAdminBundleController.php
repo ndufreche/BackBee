@@ -112,12 +112,16 @@ abstract class AbstractAdminBundleController extends AbstractBundleController
 
     public function moveUploadedFile(Request $request, $inputName)
     {
-        $originaleName = $request->request->get(sprintf(BundleAdminHelper::UPLOAD_ORIGINAL_NAME_PATTERN, $name));
-        $filePath = $request->request->get(sprintf(BundleAdminHelper::UPLOAD_PATH_PATTERN, $name));
-        $fileName = $request->request->get(sprintf(BundleAdminHelper::UPLOAD_FILE_NAME_PATTERN, $name));
+        $originaleName = $request->request->get(sprintf(BundleAdminHelper::UPLOAD_ORIGINAL_NAME_PATTERN, $inputName));
+        $filePath = $request->request->get(sprintf(BundleAdminHelper::UPLOAD_PATH_PATTERN, $inputName));
+        $fileName = $request->request->get(sprintf(BundleAdminHelper::UPLOAD_FILE_NAME_PATTERN, $inputName));
+
+        if ($filePath === null || $originaleName === null) {
+            return $fileName;
+        }
 
         $finalPath = Media::getPathFromFilename($fileName, $originaleName, 3, true);
-        var_dump($originaleName, $filePath, $fileName, $finalPath);die;
+
         try {
             File::move($filePath, $finalPath);
 

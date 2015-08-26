@@ -24,6 +24,7 @@
 namespace BackBee\Util;
 
 use BackBee\ClassContent\Element\File as ElementFile;
+use BackBee\Exception\BBException;
 use BackBee\Exception\InvalidArgumentException;
 use BackBee\Utils\File\File;
 
@@ -79,7 +80,7 @@ class Media
             throw new InvalidArgumentException('Enable to compute path, the provided uid is not a valid string');
         }
 
-        return  self::getPathFromFilename($uid, $originalname, $folder_size, $include_originalname)
+        return  self::getPathFromFilename($uid, $originalname, $folder_size, $include_originalname);
     }
 
     /**
@@ -95,10 +96,9 @@ class Media
     public static function getPathFromFilename($filename, $originalname, $folder_size = 3, $include_originalname = false)
     {
         $folder = '';
-        $filename = $uid;
-        if (0 < $folder_size && strlen($uid) > $folder_size) {
-            $folder = substr($uid, 0, $folder_size).DIRECTORY_SEPARATOR;
-            $filename = substr($uid, $folder_size);
+        if (0 < $folder_size && strlen($filename) > $folder_size) {
+            $folder = substr($filename, 0, $folder_size).DIRECTORY_SEPARATOR;
+            $filename = substr($filename, $folder_size);
         }
 
         if (true === $include_originalname) {
@@ -127,7 +127,7 @@ class Media
     public static function resize($source, $dest, $width, $height)
     {
         if (false === extension_loaded('gd')) {
-            throw new \BackBee\Exception\BBException('gd extension is required');
+            throw new BBException('gd extension is required');
         }
 
         if (false === is_readable($source)) {

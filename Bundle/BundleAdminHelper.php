@@ -61,12 +61,12 @@ class BundleAdminHelper
         return $this->renderer->bundleAdminForm($route, $query, $httpMethod);
     }
 
-    public function fileUpload($name)
+    public function fileUpload($name, $oldValue = '')
     {
-        return '<input name="'.md5($name).'" data-file-upload="'.$name.'" type="file"'.$input.'>'.
+        return '<div class="bundle-admin-dropzone" data-file-upload="'.$name.'" type="file">'.
             '<input id="'.sprintf(self::UPLOAD_ORIGINAL_NAME_PATTERN, $name).'" name="'.sprintf(self::UPLOAD_ORIGINAL_NAME_PATTERN, $name).'" type="hidden" value="">'.
             '<input id="'.sprintf(self::UPLOAD_PATH_PATTERN, $name).'" name="'.sprintf(self::UPLOAD_PATH_PATTERN, $name).'" type="hidden" value="">'.
-            '<input id="'.sprintf(self::UPLOAD_FILE_NAME_PATTERN, $name).'" name="'.sprintf(self::UPLOAD_FILE_PATTERN, $name).'" type="hidden" value="">';
+            '<input id="'.sprintf(self::UPLOAD_FILE_NAME_PATTERN, $name).'" name="'.sprintf(self::UPLOAD_FILE_NAME_PATTERN, $name).'" type="hidden" value="'.$oldValue.'">';
     }
 
 }
